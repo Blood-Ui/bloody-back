@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+from .manager import UserManager
 
 
 class User(AbstractUser, PermissionsMixin):
@@ -16,6 +17,8 @@ class User(AbstractUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    objects = UserManager()
 
     def __str__(self):
         return self.email
