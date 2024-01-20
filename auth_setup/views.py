@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import UserRegisterSerializer
+from .utils import send_code_to_user
 
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
@@ -14,7 +15,7 @@ class RegisterUserView(GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             user = serializer.data
-            # send email function user[email]
+            send_code_to_user(user['email'])
             return Response({
                 "data": user,
                 "message": f'hi {user.first_name} thanks for signing up, a passcode has been sent to your email address {user.email}'
