@@ -23,3 +23,12 @@ def send_code_to_user(email):
 
     send_email = EmailMessage(subject=Subject, body=email_body, from_email=from_email, to=[email])
     send_email.send(fail_silently=False)
+
+def send_normal_email(data):
+    email = EmailMessage(
+        subject=data['email_subject'],
+        body=data['email_body'],
+        from_email=decouple.config("FROM_MAIL"),
+        to=[data['to_email']]
+    )
+    email.send()
