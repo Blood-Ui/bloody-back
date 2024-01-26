@@ -7,7 +7,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutUserSerializer
 from .utils import send_code_to_user
 from .models import User, OneTimePassword
 
@@ -81,3 +81,18 @@ class SetNewPasswordView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response({'message': 'password reset successful'}, status=status.HTTP_200_OK) 
     
+class LogoutUserView(GenericAPIView):
+    serializer_class = LogoutUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'user logged out successfully'}, status=status.HTTP_200_OK)
+    
+class TestAuthenticationView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response({'message': 'authenticated'}, status=status.HTTP_200_OK)
