@@ -90,3 +90,9 @@ class LogoutUserView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message': 'user logged out successfully'}, status=status.HTTP_200_OK)
+    
+class TestAuthenticationView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response({'message': 'authenticated'}, status=status.HTTP_200_OK)
