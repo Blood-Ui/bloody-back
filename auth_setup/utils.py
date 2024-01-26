@@ -17,7 +17,7 @@ def send_code_to_user(email):
     user = User.objects.get(email=email)
     current_site = "myAuth.com"
     email_body = f"Hi {user.first_name}, thanks for signing up on {current_site} please verify your email by entering the \n one time passcode: {otp_code}"
-    from_email = decouple.config("FROM_EMAIL")
+    from_email = decouple.config("FROM_MAIL")
 
     OneTimePassword.objects.create(user=user, code=otp_code)
 
