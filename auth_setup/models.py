@@ -5,6 +5,7 @@ from .manager import UserManager
 
 
 class User(AbstractUser, PermissionsMixin):
+    username = None
     email = models.EmailField(max_length=255, unique=True, verbose_name=_('Email Address'))
     first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))
