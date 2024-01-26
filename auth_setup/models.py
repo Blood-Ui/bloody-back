@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.tokens import RefreshToken
 from .manager import UserManager
 
 
 class User(AbstractUser, PermissionsMixin):
+    username = None
     email = models.EmailField(max_length=255, unique=True, verbose_name=_('Email Address'))
     first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))
@@ -27,5 +29,16 @@ class User(AbstractUser, PermissionsMixin):
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
     
-    def token(self):
-        pass
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        return{
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }
+
+class OneTimePassword(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6, unique=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - passcode"
