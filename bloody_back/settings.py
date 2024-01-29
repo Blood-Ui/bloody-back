@@ -59,6 +59,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'bloody_back.urls'
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
