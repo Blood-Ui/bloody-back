@@ -1,11 +1,12 @@
 from django.shortcuts import render
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutUserSerializer
 from .utils import send_code_to_user
@@ -95,4 +96,14 @@ class TestAuthenticationView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            print("this is decoded token claims", token.payload)
+            print("this is decoded token", token)
+            print("this is decoded user", user)
+        else:
+            print("no token is provided in the header or the header is missing")
         return Response({'message': 'authenticated'}, status=status.HTTP_200_OK)
