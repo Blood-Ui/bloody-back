@@ -9,5 +9,6 @@ urlpatterns = [
         path('delete/<uuid:role_id>/', RoleAPIView.as_view(), name='role_delete'), #single delete
 
         path('user-role/', UserRoleView.as_view(), name='user-role'), #get
+        path('user-role/create/', UserRoleView.as_view(), name='user-role-create'),
 
     ]

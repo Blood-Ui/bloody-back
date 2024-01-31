@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Role, UserRoleLink
-from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer
+from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer, UserRoleCreateEditSerializer
 
 
 class RoleDropDownAPIView(APIView):
@@ -75,3 +75,17 @@ class UserRoleView(APIView):
         user_roles = UserRoleLink.objects.all()
         serializer = UserRoleListSerializer(user_roles, many=True)
         return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        serializer = UserRoleCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "successfully created role", "response": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"message": "failed to create role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

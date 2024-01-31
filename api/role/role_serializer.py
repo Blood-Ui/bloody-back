@@ -44,3 +44,22 @@ class UserRoleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRoleLink
         fields = '__all__'
+
+
+class UserRoleCreateEditSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(required=True)
+    role = serializers.CharField(required=True)
+
+    class Meta:
+        model = UserRoleLink
+        fields = ['user', 'role']
+
+    def create(self, validated_data):
+        user_id = self.context["user_id"]
+
+        validated_data["user_id"] = validated_data.pop("user")
+        validated_data["role_id"] = validated_data.pop("role")
+        validated_data["created_by_id"] = user_id
+        validated_data["updated_by_id"] = user_id
+        user_role = UserRoleLink.objects.create(**validated_data)
+        return user_role
