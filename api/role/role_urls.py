@@ -6,5 +6,6 @@ urlpatterns = [
         path('all/', RoleAPIView.as_view(), name='role_detail'), #get
         path('create/', RoleAPIView.as_view(), name='role_create'), #single post
         path('update/<uuid:role_id>/', RoleAPIView.as_view(), name='role_update'), #single patch
+        path('delete/<uuid:role_id>/', RoleAPIView.as_view(), name='role_delete'), #single delete
 
     ]
