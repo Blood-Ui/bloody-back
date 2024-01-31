@@ -79,3 +79,25 @@ class UserRoleCreateSerializer(serializers.ModelSerializer):
         if not Role.objects.filter(id=value).exists():
             raise serializers.ValidationError("Enter a valid role")
         return value
+    
+class UserRoleUpdateSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(required=True)
+
+    class Meta:
+        model = UserRoleLink
+        fields = ['role']
+
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+        new_role = validated_data.get("role")
+        if UserRoleLink.objects.filter(user=instance.user, role=new_role).exists():
+            raise serializers.ValidationError("User Role already exists")
+        instance.role_id = new_role
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
+
+    def validate_role(self, value):
+        if not Role.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Enter a valid role")
+        return value

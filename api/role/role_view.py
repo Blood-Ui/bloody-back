@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Role, UserRoleLink
-from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer, UserRoleCreateSerializer
+from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer, UserRoleCreateSerializer, UserRoleUpdateSerializer
 
 
 class RoleDropDownAPIView(APIView):
@@ -89,3 +89,19 @@ class UserRoleView(APIView):
             serializer.save()
             return Response({"message": "successfully created role", "response": serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"message": "failed to create role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, user_role_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        user_role = UserRoleLink.objects.filter(id=user_role_id).first()
+        if not user_role:
+            return Response({"message": "user role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserRoleUpdateSerializer(user_role, data=request.data, context={'request': request, 'user_id': user_id})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "successfully updated role", "response": serializer.data}, status=status.HTTP_200_OK)
+        return Response({"message": "failed to update role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
