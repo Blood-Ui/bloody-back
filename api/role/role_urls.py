@@ -4,5 +4,6 @@ from .role_view import RoleDropDownAPIView, RoleAPIView
 urlpatterns = [
         path('', RoleDropDownAPIView.as_view(), name='role_list'),
         path('all/', RoleAPIView.as_view(), name='role_detail'), #get
+        path('create/', RoleAPIView.as_view(), name='role_create'), #single post
 
     ]
