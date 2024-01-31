@@ -33,4 +33,14 @@ class RoleCreateEditSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get("name", instance.name)
         instance.updated_by_id = user_id
         instance.save()
-        return instance    
+        return instance
+
+class UserRoleListSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.get_full_name')
+    role = serializers.CharField(source='role.name')
+    updated_by = serializers.CharField(source='updated_by.get_full_name')
+    created_by = serializers.CharField(source='created_by.get_full_name')
+
+    class Meta:
+        model = Role
+        fields = '__all__'

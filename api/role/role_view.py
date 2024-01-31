@@ -5,8 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from api.models import Role
-from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer
+from api.models import Role, UserRoleLink
+from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer
 
 
 class RoleDropDownAPIView(APIView):
@@ -67,3 +67,11 @@ class RoleAPIView(APIView):
             return Response({"message": "role does not exist"}, status=status.HTTP_404_NOT_FOUND)
         role.delete()
         return Response({"message": "successfully deleted role"}, status=status.HTTP_200_OK)
+    
+class UserRoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_roles = UserRoleLink.objects.all()
+        serializer = UserRoleListSerializer(user_roles, many=True)
+        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
