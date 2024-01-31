@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Blood_Group
-from .blood_group_serializer import BloodGroupDropDownSerizlizer
+from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
     permission_classes = [IsAuthenticated]
@@ -14,4 +14,12 @@ class Blood_Group_DropdownAPIview(APIView):
     def get(self, request):
         blood_groups = Blood_Group.objects.all()
         serializer = BloodGroupDropDownSerizlizer(blood_groups, many=True)
+        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+class Blood_Group_APIview(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        blood_groups = Blood_Group.objects.all()
+        serializer = BloodGroupListSerializer(blood_groups, many=True)
         return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
