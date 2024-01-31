@@ -7,5 +7,14 @@ class Role(models.Model):
     name = models.CharField(max_length=30, unique=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_by')
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='updated_by')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='role_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='role_updated_by')
+
+class UserRoleLink(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_role_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_role_updated_by')
