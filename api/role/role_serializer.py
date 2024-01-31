@@ -47,7 +47,7 @@ class UserRoleListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserRoleCreateEditSerializer(serializers.ModelSerializer):
+class UserRoleCreateSerializer(serializers.ModelSerializer):
     user = serializers.CharField(required=True)
     role = serializers.CharField(required=True)
 
