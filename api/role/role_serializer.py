@@ -1,6 +1,6 @@
 import uuid
 from rest_framework import serializers
-from api.models import Role
+from api.models import Role, UserRoleLink
 
 class RoleDropDownSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,5 +42,5 @@ class UserRoleListSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source='created_by.get_full_name')
 
     class Meta:
-        model = Role
+        model = UserRoleLink
         fields = '__all__'
