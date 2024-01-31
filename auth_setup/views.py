@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -96,11 +95,14 @@ class TestAuthenticationView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        # import jwt
+        # print(jwt.decode(token, config('SECRET_KEY'), algorithms=["HS256"]))
         JWT_authenticator = JWTAuthentication()
         response = JWT_authenticator.authenticate(request)
         if response is not None:
             # unpacking
             user , token = response
+            print(token.payload['user_id'])
             print("this is decoded token claims", token.payload)
             print("this is decoded token", token)
             print("this is decoded user", user)
