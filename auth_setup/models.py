@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
@@ -7,6 +8,7 @@ from .manager import UserManager
 
 class User(AbstractUser, PermissionsMixin):
     username = None
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True, verbose_name=_('Email Address'))
     first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))
