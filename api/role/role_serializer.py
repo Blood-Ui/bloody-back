@@ -14,3 +14,16 @@ class RoleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = '__all__'
+
+class RoleCreateEditSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Role
+        fields = ['name']
+
+    def create(self, validated_data):
+        user_id = self.context["user_id"]
+        validated_data["created_by_id"] = user_id
+        validated_data["updated_by_id"] = user_id
+        role = Role.objects.create(**validated_data)
+        return role
