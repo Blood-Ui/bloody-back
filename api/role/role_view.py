@@ -16,3 +16,11 @@ class RoleDropDownAPIView(APIView):
         roles = Role.objects.all()
         serializer = RoleDropDownSerializer(roles, many=True)
         return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+
+class RoleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        roles = Role.objects.all()
+        serializer = RoleListSerializer(roles, many=True)
+        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
