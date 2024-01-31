@@ -11,5 +11,6 @@ urlpatterns = [
         path('user-role/', UserRoleView.as_view(), name='user-role'), #get
         path('user-role/create/', UserRoleView.as_view(), name='user-role-create'), #single post
         path('user-role/update/<uuid:user_role_id>/', UserRoleView.as_view(), name='user-role-update'), #single patch
+        path('user-role/delete/<uuid:user_role_id>/', UserRoleView.as_view(), name='user-role-delete'), #single delete
 
     ]

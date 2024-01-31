@@ -105,3 +105,16 @@ class UserRoleView(APIView):
             serializer.save()
             return Response({"message": "successfully updated role", "response": serializer.data}, status=status.HTTP_200_OK)
         return Response({"message": "failed to update role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, user_role_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        user_role = UserRoleLink.objects.filter(id=user_role_id).first()
+        if not user_role:
+            return Response({"message": "user role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        user_role.delete()
+        return Response({"message": "successfully deleted role"}, status=status.HTTP_200_OK)
