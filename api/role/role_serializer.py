@@ -1,6 +1,7 @@
 import uuid
 from rest_framework import serializers
 from api.models import Role, UserRoleLink
+from auth_setup.models import User
 
 class RoleDropDownSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,3 +64,18 @@ class UserRoleCreateEditSerializer(serializers.ModelSerializer):
         validated_data["updated_by_id"] = user_id
         user_role = UserRoleLink.objects.create(**validated_data)
         return user_role
+    
+    def validate(self, data):
+        if UserRoleLink.objects.filter(user=data['user'], role=data['role']).exists():
+            raise serializers.ValidationError("User Role already exists")
+        return data
+    
+    def validate_user(self, value):
+        if not User.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Enter a valid user")
+        return value
+    
+    def validate_role(self, value):
+        if not Role.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Enter a valid role")
+        return value
