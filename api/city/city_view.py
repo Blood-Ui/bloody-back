@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import City
-from .city_serializer import CityCreateSerializer, CityListSerializer
+from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer
 
 class CityAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -39,7 +39,7 @@ class CityAPIView(APIView):
         city = City.objects.get(id=city_id)
         if not city:
             return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CityCreateSerializer(city, data=request.data, context={'request': request, 'user_id': user_id})
+        serializer = CityUpdateSerializer(city, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "successfully updated city", "response": serializer.data}, status=status.HTTP_200_OK)
@@ -57,3 +57,4 @@ class CityAPIView(APIView):
             return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
         city.delete()
         return Response({"message": "successfully deleted city"}, status=status.HTTP_204_NO_CONTENT)
+    
