@@ -52,3 +52,8 @@ class CityUpdateSerializer(serializers.ModelSerializer):
             instance.updated_by_id = user_id
             instance.save()
             return instance
+        
+class CityDropDownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ['id', 'name']

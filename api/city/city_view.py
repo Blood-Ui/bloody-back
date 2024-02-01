@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import City
-from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer
+from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer, CityDropDownSerializer
 
 class CityAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -58,3 +58,10 @@ class CityAPIView(APIView):
         city.delete()
         return Response({"message": "successfully deleted city"}, status=status.HTTP_204_NO_CONTENT)
     
+class CityDropDownView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        cities = City.objects.all()
+        serializer = CityDropDownSerializer(cities, many=True)
+        return Response({"message": "successfully fetched cities", "response": serializer.data}, status=status.HTTP_200_OK)
