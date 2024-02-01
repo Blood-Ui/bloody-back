@@ -26,3 +26,12 @@ class CityCreateSerializer(serializers.ModelSerializer):
         if not City.objects.filter(district=value).exists():
             raise serializers.ValidationError("District does not exist")
         return value
+    
+class CityListSerializer(serializers.ModelSerializer):
+    district = serializers.CharField(source='district.name')
+    updated_by = serializers.CharField(source='updated_by.get_full_name')
+    created_by = serializers.CharField(source='created_by.get_full_name')
+
+    class Meta:
+        model = City
+        fields = '__all__'
