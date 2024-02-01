@@ -44,3 +44,16 @@ class CityAPIView(APIView):
             serializer.save()
             return Response({"message": "successfully updated city", "response": serializer.data}, status=status.HTTP_200_OK)
         return Response({"message": "failed to update city", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, city_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        city = City.objects.get(id=city_id)
+        if not city:
+            return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        city.delete()
+        return Response({"message": "successfully deleted city"}, status=status.HTTP_204_NO_CONTENT)
