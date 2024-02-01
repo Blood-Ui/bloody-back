@@ -17,4 +17,15 @@ class BloodGroupListSerializer(serializers.ModelSerializer):
         model = Blood_Group
         fields = '__all__'
 
+class BloodGroupCreateEditSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Blood_Group
+        fields = ['name']
+
+    def create(self, validated_data):
+        user_id = self.context["user_id"]
+        validated_data["created_by_id"] = user_id
+        validated_data["updated_by_id"] = user_id
+        blood_group = Blood_Group.objects.create(**validated_data)
+        return blood_group
