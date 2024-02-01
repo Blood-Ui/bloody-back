@@ -6,10 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import District
-from .district_serializer import DistrictCreateEditSerializer
+from .district_serializer import DistrictCreateEditSerializer, DistrictListSerializer
 
 class DistrictAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        districts = District.objects.all()
+        serializer = DistrictListSerializer(districts, many=True)
+        return Response({"message": "successfully fetched districts", "response": serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
