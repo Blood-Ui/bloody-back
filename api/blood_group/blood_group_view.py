@@ -52,3 +52,16 @@ class Blood_Group_APIview(APIView):
             serializer.save()
             return Response({"message": "successfully updated blood group", "response": serializer.data}, status=status.HTTP_200_OK)
         return Response({"message": "failed to update blood group", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, blood_group_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        blood_group = Blood_Group.objects.get(id=blood_group_id)
+        if blood_group is None:
+            return Response({"message": "blood group not found"}, status=status.HTTP_404_NOT_FOUND)
+        blood_group.delete()
+        return Response({"message": "successfully deleted blood group"}, status=status.HTTP_204_NO_CONTENT)
