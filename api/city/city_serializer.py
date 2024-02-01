@@ -21,3 +21,8 @@ class CityCreateSerializer(serializers.ModelSerializer):
         if City.objects.filter(name=data['name'], district=data['district']).exists():
             raise serializers.ValidationError("City already exists")
         return data
+    
+    def validate_district(self, value):
+        if not City.objects.filter(district=value).exists():
+            raise serializers.ValidationError("District does not exist")
+        return value
