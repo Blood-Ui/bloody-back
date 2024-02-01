@@ -29,3 +29,10 @@ class BloodGroupCreateEditSerializer(serializers.ModelSerializer):
         validated_data["updated_by_id"] = user_id
         blood_group = Blood_Group.objects.create(**validated_data)
         return blood_group
+
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+        instance.name = validated_data.get("name", instance.name)
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
