@@ -45,6 +45,19 @@ class DistrictAPIView(APIView):
             return Response({"message": "successfully updated district", "response": serializer.data}, status=status.HTTP_200_OK)
         return Response({"message": "failed to update district", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
+    def delete(self, request, district_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        district = District.objects.get(id=district_id)
+        if not district:
+            return Response({"message": "district not found"}, status=status.HTTP_404_NOT_FOUND)
+        district.delete()
+        return Response({"message": "successfully deleted district"}, status=status.HTTP_204_NO_CONTENT)
+    
 class DistrictDropDownAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

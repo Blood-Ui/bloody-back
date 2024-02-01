@@ -6,5 +6,6 @@ urlpatterns = [
     path('all/', DistrictAPIView.as_view(), name='district_detail'), #get
     path('create/', DistrictAPIView.as_view(), name='district_create'), #single post
     path('update/<uuid:district_id>/', DistrictAPIView.as_view(), name='district_update'), #single patch
+    path('delete/<uuid:district_id>/', DistrictAPIView.as_view(), name='district_delete'), #single delete
 
 ]
