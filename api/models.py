@@ -43,3 +43,21 @@ class City(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='city_created_by')
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='city_updated_by')
+
+class Organization(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=30, unique=True, blank=False)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organization_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organization_updated_by')
+
+class UserOrganizationLink(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_organization_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_organization_updated_by')
