@@ -21,3 +21,8 @@ class DistrictListSerializer(serializers.ModelSerializer):
     class Meta:
         model = District
         fields = '__all__'
+
+class DistrictDropDownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ['id', 'name']

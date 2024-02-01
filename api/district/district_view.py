@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import District
-from .district_serializer import DistrictCreateEditSerializer, DistrictListSerializer
+from .district_serializer import DistrictCreateEditSerializer, DistrictListSerializer, DistrictDropDownSerializer
 
 class DistrictAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -28,3 +28,11 @@ class DistrictAPIView(APIView):
             serializer.save()
             return Response({"message": "successfully created district", "response": serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"message": "failed to create district", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+class DistrictDropDownAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        districts = District.objects.all()
+        serializer = DistrictDropDownSerializer(districts, many=True)
+        return Response({"message": "successfully fetched districts", "response": serializer.data}, status=status.HTTP_200_OK)
