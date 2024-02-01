@@ -50,5 +50,5 @@ class Organization(models.Model):
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_by')
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='updated_by')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organization_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organization_updated_by')
