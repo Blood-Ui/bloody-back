@@ -16,3 +16,8 @@ class CityCreateSerializer(serializers.ModelSerializer):
         validated_data["updated_by_id"] = user_id
         city = City.objects.create(**validated_data)
         return city
+    
+    def validate(self, data):
+        if City.objects.filter(name=data['name'], district=data['district']).exists():
+            raise serializers.ValidationError("City already exists")
+        return data
