@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Donor
-from .donor_serializer import DonorCreateUpdateSerializer, DonorListSerializer
+from .donor_serializer import DonorCreateUpdateSerializer, DonorListSerializer, DonorDropDownSerializer
 
 
 class DonorAPIView(APIView):
@@ -53,3 +53,11 @@ class DonorAPIView(APIView):
             return Response({"message": "donor not found"}, status=status.HTTP_404_NOT_FOUND)
         donor.delete()
         return Response({"message": "successfully deleted donor"}, status=status.HTTP_204_NO_CONTENT)
+    
+class DonorDropDownAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        donors = Donor.objects.all()
+        serializer = DonorDropDownSerializer(donors, many=True)
+        return Response({"message": "successfully fetched donors", "response": serializer.data}, status=status.HTTP_200_OK)

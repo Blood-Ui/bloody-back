@@ -50,3 +50,8 @@ class DonorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donor
         fields = '__all__'
+
+class DonorDropDownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donor
+        fields = ['id', 'name']
