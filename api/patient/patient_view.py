@@ -55,3 +55,11 @@ class PatientAPIView(APIView):
 
         patient.delete()
         return Response({"message": "successfully deleted patient"}, status=status.HTTP_200_OK)
+    
+class PatientDropDownAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        patients = Patient.objects.all()
+        serializer = PatientListSerializer(patients, many=True)
+        return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)

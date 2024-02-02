@@ -52,3 +52,9 @@ class PatientListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = '__all__'
+
+class PatientDropDownSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Patient
+        fields = ['id', 'name']
