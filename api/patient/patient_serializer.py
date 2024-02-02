@@ -19,4 +19,17 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
         validated_data["updated_by_id"] = user_id
         patient = Patient.objects.create(**validated_data)
         return patient
+    
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+
+        instance.name = validated_data.get("name", instance.name)
+        instance.bystander_name = validated_data.get("bystander_name", instance.bystander_name)
+        instance.bystander_phone_number = validated_data.get("bystander_phone_number", instance.bystander_phone_number)
+        instance.hospital_name = validated_data.get("hospital_name", instance.hospital_name)
+        instance.blood_group_id = validated_data.get("blood_group", instance.blood_group_id)
+        instance.city_id = validated_data.get("city", instance.city_id)
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
 
