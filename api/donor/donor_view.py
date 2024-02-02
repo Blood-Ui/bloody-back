@@ -46,3 +46,10 @@ class DonorAPIView(APIView):
             serializer.save()
             return Response({"message": "successfully updated donor", "response": serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"message": "failed to update donor", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, donor_id):
+        donor = Donor.objects.get(id=donor_id)
+        if donor is None:
+            return Response({"message": "donor not found"}, status=status.HTTP_404_NOT_FOUND)
+        donor.delete()
+        return Response({"message": "successfully deleted donor"}, status=status.HTTP_204_NO_CONTENT)
