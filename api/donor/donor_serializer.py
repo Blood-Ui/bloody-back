@@ -28,3 +28,13 @@ class DonorCreateSerializer(serializers.ModelSerializer):
         if not City.objects.filter(id=value).exists():
             raise serializers.ValidationError("City does not exist")
         return value
+    
+class DonorListSerializer(serializers.ModelSerializer):
+    blood_group = serializers.CharField(source='blood_group.name')
+    city = serializers.CharField(source='city.name')
+    updated_by = serializers.CharField(source='updated_by.get_full_name')
+    created_by = serializers.CharField(source='created_by.get_full_name')
+
+    class Meta:
+        model = Donor
+        fields = '__all__'
