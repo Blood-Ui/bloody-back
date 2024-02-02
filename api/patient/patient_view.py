@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Patient
-from .patient_serializer import PatientCreateUpdateSerializer
+from .patient_serializer import PatientCreateUpdateSerializer, PatientListSerializer
 
 
 class PatientAPIView(APIView):
@@ -42,3 +42,8 @@ class PatientAPIView(APIView):
             serializer.save()
             return Response({"message": "successfully updated patient", "response": serializer.data}, status=status.HTTP_200_OK)
         return Response({"message": "failed to update patient", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request):
+        patients = Patient.objects.all()
+        serializer = PatientListSerializer(patients, many=True)
+        return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
