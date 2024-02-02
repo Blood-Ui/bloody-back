@@ -61,8 +61,8 @@ class Blood_Group_APIview(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-        blood_group = Blood_Group.objects.get(id=blood_group_id)
-        if blood_group is None:
+        if not Blood_Group.objects.filter(id=blood_group_id).exists():
             return Response({"message": "blood group not found"}, status=status.HTTP_404_NOT_FOUND)
+        blood_group = Blood_Group.objects.get(id=blood_group_id)
         blood_group.delete()
         return Response({"message": "successfully deleted blood group"}, status=status.HTTP_204_NO_CONTENT)
