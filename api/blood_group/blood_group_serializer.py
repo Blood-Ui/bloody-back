@@ -36,3 +36,8 @@ class BloodGroupCreateEditSerializer(serializers.ModelSerializer):
         instance.updated_by_id = user_id
         instance.save()
         return instance
+    
+    def validate(self, data):
+        if Blood_Group.objects.filter(name=data['name']).exists():
+            raise serializers.ValidationError("Blood Group already exists")
+        return data
