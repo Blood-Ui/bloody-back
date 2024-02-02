@@ -61,3 +61,16 @@ class UserOrganizationLink(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_organization_created_by')
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_organization_updated_by')
+
+class Donor(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, blank=False)
+    phone_number = models.CharField(max_length=15, unique=True, blank=False)
+    email = models.EmailField(max_length=255, unique=True, blank=False)
+    date_of_birth = models.DateField(blank=False)
+    blood_group = models.ForeignKey(Blood_Group, on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donor_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donor_updated_by')
