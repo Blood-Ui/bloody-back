@@ -47,3 +47,11 @@ class PatientAPIView(APIView):
         patients = Patient.objects.all()
         serializer = PatientListSerializer(patients, many=True)
         return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+    def delete(self, request, patient_id):
+        patient = Patient.objects.filter(id=patient_id).first()
+        if not patient:
+            return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        patient.delete()
+        return Response({"message": "successfully deleted patient"}, status=status.HTTP_200_OK)
