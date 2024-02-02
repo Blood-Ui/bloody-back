@@ -6,5 +6,6 @@ urlpatterns = [
     path('district/', include('api.district.district_urls')),
     path('city/', include('api.city.city_urls')),
     path('donor/', include('api.donor.donor_urls')),
+    path('patient/', include('api.patient.patient_urls')),
     
 ]
