@@ -36,9 +36,10 @@ class DistrictAPIView(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-        district = District.objects.get(id=district_id)
-        if not district:
+
+        if not District.objects.filter(id=district_id).exists():
             return Response({"message": "district not found"}, status=status.HTTP_404_NOT_FOUND)
+        district = District.objects.get(id=district_id)
         serializer = DistrictCreateEditSerializer(district, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
@@ -52,9 +53,10 @@ class DistrictAPIView(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-        district = District.objects.get(id=district_id)
-        if not district:
+        
+        if not District.objects.filter(id=district_id).exists():
             return Response({"message": "district not found"}, status=status.HTTP_404_NOT_FOUND)
+        district = District.objects.get(id=district_id)
         district.delete()
         return Response({"message": "successfully deleted district"}, status=status.HTTP_204_NO_CONTENT)
     
