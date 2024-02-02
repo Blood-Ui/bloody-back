@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Patient
+from api.models import Patient, Blood_Group, City
 
 
 class PatientCreateUpdateSerializer(serializers.ModelSerializer):
@@ -32,4 +32,13 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
         instance.updated_by_id = user_id
         instance.save()
         return instance
-
+    
+    def validate_blood_group(self, value):
+        if not Blood_Group.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Blood Group does not exist")
+        return value
+    
+    def validate_city(self, value):
+        if not City.objects.filter(id=value).exists():
+            raise serializers.ValidationError("City does not exist")
+        return value
