@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from api.models import Patient, Blood_Group, City
+from api.models import Patient, Blood_Group, City, Request
+from api.utils import RequestStatus
 
 
 class PatientCreateUpdateSerializer(serializers.ModelSerializer):
@@ -18,6 +19,8 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
         validated_data["created_by_id"] = user_id
         validated_data["updated_by_id"] = user_id
         patient = Patient.objects.create(**validated_data)
+
+        Request.objects.create(patient_id=patient.id, status=RequestStatus.OPEN.value, created_by_id=user_id, updated_by_id=user_id)
         return patient
     
     def update(self, instance, validated_data):
@@ -43,6 +46,12 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("City does not exist")
         return value
     
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['id'] = instance.id
+
+        return representation
+    
 class PatientListSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(source='blood_group.name')
     city = serializers.CharField(source='city.name')
@@ -54,7 +63,7 @@ class PatientListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PatientDropDownSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Patient
         fields = ['id', 'name']
