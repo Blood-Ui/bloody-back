@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import City
+from api.models import City, District
 
 class CityCreateSerializer(serializers.ModelSerializer):
     district = serializers.CharField(source='district.name')
@@ -23,7 +23,7 @@ class CityCreateSerializer(serializers.ModelSerializer):
         return data
     
     def validate_district(self, value):
-        if not City.objects.filter(district=value).exists():
+        if not District.objects.filter(district=value).exists():
             raise serializers.ValidationError("District does not exist")
         return value
     
