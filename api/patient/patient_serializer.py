@@ -46,6 +46,12 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("City does not exist")
         return value
     
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['id'] = instance.id
+
+        return representation
+    
 class PatientListSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(source='blood_group.name')
     city = serializers.CharField(source='city.name')
