@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from api.models import Donor, Blood_Group, City
 
-class DonorCreateSerializer(serializers.ModelSerializer):
+class DonorCreateUpdateSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(required=True)
     city = serializers.CharField(required=True)
 
