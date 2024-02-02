@@ -5,5 +5,6 @@ urlpatterns = [
     path('blood-group/', include('api.blood_group.blood_group_urls')),
     path('district/', include('api.district.district_urls')),
     path('city/', include('api.city.city_urls')),
+    path('donor/', include('api.donor.donor_urls')),
     
 ]
