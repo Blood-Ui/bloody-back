@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Donor
+from api.models import Donor, Blood_Group, City
 
 class DonorCreateSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(required=True)
@@ -18,3 +18,13 @@ class DonorCreateSerializer(serializers.ModelSerializer):
         validated_data["updated_by_id"] = user_id
         donor = Donor.objects.create(**validated_data)
         return donor
+    
+    def validate_blood_group(self, value):
+        if not Blood_Group.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Blood Group does not exist")
+        return value
+    
+    def validate_city(self, value):
+        if not City.objects.filter(id=value).exists():
+            raise serializers.ValidationError("City does not exist")
+        return value
