@@ -29,7 +29,7 @@ class DistrictAPIView(APIView):
             return Response({"message": "successfully created district", "response": serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"message": "failed to create district", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
-    def update(self, request, district_id):
+    def patch(self, request, district_id):
         JWT_authenticator = JWTAuthentication()
         response = JWT_authenticator.authenticate(request)
         if response is not None:
