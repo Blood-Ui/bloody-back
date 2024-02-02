@@ -36,9 +36,9 @@ class CityAPIView(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-        city = City.objects.get(id=city_id)
-        if not city:
+        if not City.objects.filter(id=city_id).exists():
             return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        city = City.objects.get(id=city_id)
         serializer = CityUpdateSerializer(city, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
@@ -52,9 +52,9 @@ class CityAPIView(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-        city = City.objects.get(id=city_id)
-        if not city:
+        if not City.objects.filter(id=city_id).exists():
             return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        city = City.objects.get(id=city_id)
         city.delete()
         return Response({"message": "successfully deleted city"}, status=status.HTTP_204_NO_CONTENT)
     
