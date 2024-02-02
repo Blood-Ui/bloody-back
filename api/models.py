@@ -74,3 +74,16 @@ class Donor(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donor_created_by')
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donor_updated_by')
+
+class Patient(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True, blank=False)
+    bystander_name = models.CharField(max_length=255, blank=False)
+    bystander_phone_number = models.CharField(max_length=15, blank=False)
+    hospital_name = models.CharField(max_length=255, blank=False)
+    blood_group = models.ForeignKey(Blood_Group, on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='updated_by')
