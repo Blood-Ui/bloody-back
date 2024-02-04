@@ -54,6 +54,11 @@ class CityUpdateSerializer(serializers.ModelSerializer):
         instance.updated_by_id = user_id
         instance.save()
         return instance
+    
+    def validate_district(self, value):
+        if not District.objects.filter(id=value).exists():
+            raise serializers.ValidationError("District does not exist")
+        return value
         
 class CityDropDownSerializer(serializers.ModelSerializer):
     class Meta:
