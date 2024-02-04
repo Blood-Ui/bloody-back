@@ -3,7 +3,7 @@ from api.models import Patient, Blood_Group, City, Request
 from api.utils import RequestStatus
 
 
-class PatientCreateUpdateSerializer(serializers.ModelSerializer):
+class PatientCreateSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(required=True)
     city = serializers.CharField(required=True)
 
@@ -23,19 +23,6 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
         Request.objects.create(patient_id=patient.id, status=RequestStatus.OPEN.value, created_by_id=user_id, updated_by_id=user_id)
         return patient
     
-    def update(self, instance, validated_data):
-        user_id = self.context.get("user_id")
-
-        instance.name = validated_data.get("name", instance.name)
-        instance.bystander_name = validated_data.get("bystander_name", instance.bystander_name)
-        instance.bystander_phone_number = validated_data.get("bystander_phone_number", instance.bystander_phone_number)
-        instance.hospital_name = validated_data.get("hospital_name", instance.hospital_name)
-        instance.blood_group_id = validated_data.get("blood_group", instance.blood_group_id)
-        instance.city_id = validated_data.get("city", instance.city_id)
-        instance.updated_by_id = user_id
-        instance.save()
-        return instance
-    
     def validate_blood_group(self, value):
         if not Blood_Group.objects.filter(id=value).exists():
             raise serializers.ValidationError("Blood Group does not exist")
@@ -52,15 +39,60 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
 
         return representation
     
+class PatientUpdateSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
+    bystander_name = serializers.CharField(required=False)
+    bystander_phone_number = serializers.CharField(required=False)
+    hospital_name = serializers.CharField(required=False)
+    blood_group = serializers.CharField(required=False)
+    city = serializers.CharField(required=False)
+
+    class Meta:
+        model = Patient
+        fields = ['name', 'bystander_name', 'bystander_phone_number', 'hospital_name', 'blood_group', 'city']
+
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+
+        new_name = validated_data.get("name", instance.name)
+        new_bystander_name = validated_data.get("bystander_name", instance.bystander_name)
+        new_bystander_phone_number = validated_data.get("bystander_phone_number", instance.bystander_phone_number)
+        new_hospital_name = validated_data.get("hospital_name", instance.hospital_name)
+        new_blood_group = validated_data.get("blood_group", instance.blood_group_id)
+        new_city = validated_data.get("city", instance.city_id)
+        if Patient.objects.filter(name=new_name, bystander_name=new_bystander_name, bystander_phone_number=new_bystander_phone_number, hospital_name=new_hospital_name, blood_group_id=new_blood_group, city_id=new_city).exists():
+            raise serializers.ValidationError("Patient with same details already exists")
+        
+        instance.name = new_name
+        instance.bystander_name = new_bystander_name
+        instance.bystander_phone_number = new_bystander_phone_number
+        instance.hospital_name = new_hospital_name
+        instance.blood_group_id = new_blood_group
+        instance.city_id = new_city
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
+    
+    def validate_blood_group(self, value):
+        if not Blood_Group.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Blood Group does not exist")
+        return value
+    
+    def validate_city(self, value):
+        if not City.objects.filter(id=value).exists():
+            raise serializers.ValidationError("City does not exist")
+        return value
+    
 class PatientListSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(source='blood_group.name')
     city = serializers.CharField(source='city.name')
+    district = serializers.CharField(source='city.district.name')
     updated_by = serializers.CharField(source='updated_by.get_full_name')
     created_by = serializers.CharField(source='created_by.get_full_name')
 
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['name', 'bystander_name', 'bystander_phone_number', 'blood_group', 'hospital_name', 'city', 'district', 'updated_by', 'created_by', 'updated_at', 'created_at']
 
 class PatientDropDownSerializer(serializers.ModelSerializer):
 
