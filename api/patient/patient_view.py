@@ -6,11 +6,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from .patient_serializer import PatientCreateUpdateSerializer, PatientListSerializer
+from .patient_serializer import PatientCreateUpdateSerializer, PatientListSerializer, PatientDropDownSerializer
 
 
 class PatientAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
@@ -22,9 +22,9 @@ class PatientAPIView(APIView):
 
         serializer = PatientCreateUpdateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         with transaction.atomic():
+            request_created = False
             if serializer.is_valid():
                 serializer.save()
-                request_created = False
                 if Request.objects.filter(patient_id=serializer.data['id']).exists() :
                     request_created = True
                     return Response({"message": "successfully created patient", "response": serializer.data, "request_created": request_created}, status=status.HTTP_201_CREATED)
@@ -43,7 +43,7 @@ class PatientAPIView(APIView):
         
         if not Patient.objects.filter(id=patient_id).exists():
             return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        patient = Patient.objects.filter(id=patient_id, created_by_id=user_id).first()
+        patient = Patient.objects.filter(id=patient_id).first()
         serializer = PatientCreateUpdateSerializer(patient, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -58,7 +58,7 @@ class PatientAPIView(APIView):
     def delete(self, request, patient_id):
         if not Patient.objects.filter(id=patient_id).exists():
             return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        patient = Patient.objects.filter(id=patient_id, created_by_id=user_id).first()
+        patient = Patient.objects.filter(id=patient_id).first()
 
         patient.delete()
         return Response({"message": "successfully deleted patient"}, status=status.HTTP_200_OK)
@@ -68,5 +68,5 @@ class PatientDropDownAPIView(APIView):
 
     def get(self, request):
         patients = Patient.objects.all()
-        serializer = PatientListSerializer(patients, many=True)
+        serializer = PatientDropDownSerializer(patients, many=True)
         return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
