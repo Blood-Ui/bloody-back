@@ -7,7 +7,7 @@ class DonorCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Donor
-        fields = ['name', 'email', 'phone', 'date_of_birth', 'blood_group', 'city']
+        fields = ['name', 'email', 'phone_number', 'date_of_birth', 'blood_group', 'city']
 
     def create(self, validated_data):
         user_id = self.context["user_id"]
@@ -44,12 +44,13 @@ class DonorCreateUpdateSerializer(serializers.ModelSerializer):
 class DonorListSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(source='blood_group.name')
     city = serializers.CharField(source='city.name')
+    district = serializers.CharField(source='city.district.name')
     updated_by = serializers.CharField(source='updated_by.get_full_name')
     created_by = serializers.CharField(source='created_by.get_full_name')
 
     class Meta:
         model = Donor
-        fields = '__all__'
+        fields = ['id', 'name', 'phone_number', 'email', 'date_of_birth', 'blood_group', 'city', 'district', 'updated_by', 'created_by', 'updated_at', 'created_at']
 
 class DonorDropDownSerializer(serializers.ModelSerializer):
     class Meta:
