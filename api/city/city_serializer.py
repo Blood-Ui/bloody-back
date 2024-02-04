@@ -37,6 +37,7 @@ class CityListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CityUpdateSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
     district = serializers.CharField(required=False)
 
     class Meta:
