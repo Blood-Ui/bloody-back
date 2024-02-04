@@ -3,7 +3,7 @@ from api.models import Patient, Blood_Group, City, Request
 from api.utils import RequestStatus
 
 
-class PatientCreateUpdateSerializer(serializers.ModelSerializer):
+class PatientCreateSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(required=True)
     city = serializers.CharField(required=True)
 
@@ -22,19 +22,6 @@ class PatientCreateUpdateSerializer(serializers.ModelSerializer):
 
         Request.objects.create(patient_id=patient.id, status=RequestStatus.OPEN.value, created_by_id=user_id, updated_by_id=user_id)
         return patient
-    
-    def update(self, instance, validated_data):
-        user_id = self.context.get("user_id")
-
-        instance.name = validated_data.get("name", instance.name)
-        instance.bystander_name = validated_data.get("bystander_name", instance.bystander_name)
-        instance.bystander_phone_number = validated_data.get("bystander_phone_number", instance.bystander_phone_number)
-        instance.hospital_name = validated_data.get("hospital_name", instance.hospital_name)
-        instance.blood_group_id = validated_data.get("blood_group", instance.blood_group_id)
-        instance.city_id = validated_data.get("city", instance.city_id)
-        instance.updated_by_id = user_id
-        instance.save()
-        return instance
     
     def validate_blood_group(self, value):
         if not Blood_Group.objects.filter(id=value).exists():

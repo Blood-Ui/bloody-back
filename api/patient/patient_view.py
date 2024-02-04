@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from .patient_serializer import PatientCreateUpdateSerializer, PatientListSerializer, PatientDropDownSerializer
+from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer
 
 
 class PatientAPIView(APIView):
@@ -20,7 +20,7 @@ class PatientAPIView(APIView):
             user , token = response
             user_id = token.payload['user_id']
 
-        serializer = PatientCreateUpdateSerializer(data=request.data, context={"request": request, "user_id": user_id})
+        serializer = PatientCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         with transaction.atomic():
             request_created = False
             if serializer.is_valid():
