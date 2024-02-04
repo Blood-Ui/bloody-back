@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Donor
-from .donor_serializer import DonorCreateUpdateSerializer, DonorListSerializer, DonorDropDownSerializer
+from .donor_serializer import DonorCreateSerializer, DonorListSerializer, DonorDropDownSerializer
 
 
 class DonorAPIView(APIView):
@@ -19,7 +19,7 @@ class DonorAPIView(APIView):
             user , token = response
             user_id = token.payload['user_id']
 
-        serializer = DonorCreateUpdateSerializer(data=request.data, context={"request": request, "user_id": user_id})
+        serializer = DonorCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "successfully created donor", "response": serializer.data}, status=status.HTTP_201_CREATED)
