@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer
+from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer
 
 
 class PatientAPIView(APIView):
@@ -44,7 +44,7 @@ class PatientAPIView(APIView):
         if not Patient.objects.filter(id=patient_id).exists():
             return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
         patient = Patient.objects.filter(id=patient_id).first()
-        serializer = PatientCreateUpdateSerializer(patient, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
+        serializer = PatientUpdateSerializer(patient, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "successfully updated patient", "response": serializer.data}, status=status.HTTP_200_OK)
