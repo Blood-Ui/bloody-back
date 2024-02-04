@@ -86,12 +86,13 @@ class PatientUpdateSerializer(serializers.ModelSerializer):
 class PatientListSerializer(serializers.ModelSerializer):
     blood_group = serializers.CharField(source='blood_group.name')
     city = serializers.CharField(source='city.name')
+    district = serializers.CharField(source='city.district.name')
     updated_by = serializers.CharField(source='updated_by.get_full_name')
     created_by = serializers.CharField(source='created_by.get_full_name')
 
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['name', 'bystander_name', 'bystander_phone_number', 'blood_group', 'hospital_name', 'city', 'district', 'updated_by', 'created_by', 'updated_at', 'created_at']
 
 class PatientDropDownSerializer(serializers.ModelSerializer):
 
