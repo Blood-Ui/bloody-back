@@ -1,8 +1,8 @@
 from django.urls import path
-from.donor_view import DonorAPIView
+from.donor_view import DonorAPIView, DonorDropDownAPIView
 
 urlpatterns = [
-    path('', DonorAPIView.as_view(), name='donor_list'), #drop down
+    path('', DonorDropDownAPIView.as_view(), name='donor_list'), #drop down
     path('all/', DonorAPIView.as_view(), name='donor_detail'), #get
     path('create/', DonorAPIView.as_view(), name='donor_create'), #single post
     path('update/<str:donor_id>/', DonorAPIView.as_view(), name='donor_update'), #single patch

@@ -40,11 +40,10 @@ class PatientAPIView(APIView):
             # unpacking
             user , token = response
             user_id = token.payload['user_id']
-
-        patient = Patient.objects.filter(id=patient_id, created_by_id=user_id).first()
-        if not patient:
+        
+        if not Patient.objects.filter(id=patient_id).exists():
             return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
+        patient = Patient.objects.filter(id=patient_id, created_by_id=user_id).first()
         serializer = PatientCreateUpdateSerializer(patient, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -57,9 +56,9 @@ class PatientAPIView(APIView):
         return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
     
     def delete(self, request, patient_id):
-        patient = Patient.objects.filter(id=patient_id).first()
-        if not patient:
+        if not Patient.objects.filter(id=patient_id).exists():
             return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        patient = Patient.objects.filter(id=patient_id, created_by_id=user_id).first()
 
         patient.delete()
         return Response({"message": "successfully deleted patient"}, status=status.HTTP_200_OK)
