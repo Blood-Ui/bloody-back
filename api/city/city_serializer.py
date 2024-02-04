@@ -37,21 +37,28 @@ class CityListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CityUpdateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name')
+    district = serializers.CharField(required=False)
 
     class Meta:
         model = City
-        fields = ['name']
+        fields = ['name', 'district']
 
-        def update(self, instance, validated_data):
-            user_id = self.context.get("user_id")
-            new_name = validated_data.get("name")
-            if City.objects.filter(name=new_name).exists():
-                raise serializers.ValidationError("City already exists")
-            instance.name = new_name
-            instance.updated_by_id = user_id
-            instance.save()
-            return instance
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+        new_name = validated_data.get("name", instance.name)
+        new_district = validated_data.get("district", instance.district_id)
+        if City.objects.filter(name=new_name, district=new_district).exists():
+            raise serializers.ValidationError("City already exists")
+        instance.name = new_name
+        instance.district_id = new_district
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
+    
+    def validate_district(self, value):
+        if not District.objects.filter(id=value).exists():
+            raise serializers.ValidationError("District does not exist")
+        return value
         
 class CityDropDownSerializer(serializers.ModelSerializer):
     class Meta:
