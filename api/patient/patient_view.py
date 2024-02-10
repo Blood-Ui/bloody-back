@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer
+from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer
 
 
 class PatientAPIView(APIView):
@@ -70,3 +70,11 @@ class PatientDropDownAPIView(APIView):
         patients = Patient.objects.all()
         serializer = PatientDropDownSerializer(patients, many=True)
         return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+class RequestAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        requests = Request.objects.all()
+        serializer = RequestListSerializer(requests, many=True)
+        return Response({"message": "successfully retrieved requests", "response": serializer.data}, status=status.HTTP_200_OK)
