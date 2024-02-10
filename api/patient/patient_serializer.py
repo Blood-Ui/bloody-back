@@ -108,3 +108,27 @@ class RequestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = '__all__'
+
+class RequestUpdateSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(required=True)
+
+    class Meta:
+        model = Request
+        fields = ['status']
+
+    def update(self, instance, validated_data):
+        user_id = self.context.get("user_id")
+
+        new_status = validated_data.get("status", instance.status)
+        current_status = instance.status
+        if current_status == new_status:
+            raise serializers.ValidationError("Status is same as current status")
+        instance.status = new_status
+        instance.updated_by_id = user_id
+        instance.save()
+        return instance
+
+    def validate_status(self, value):
+        if value not in RequestStatus.get_all_values():
+            raise serializers.ValidationError("Invalid status")
+        return value
