@@ -62,6 +62,11 @@ class CityDropDownView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        cities = City.objects.all()
+        if not request.data.get('district'):
+            return Response({"message": "district is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not City.objects.filter(district=request.data.get('district')).exists():
+            return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        district = request.data.get('district')
+        cities = City.objects.filter(district=district)
         serializer = CityDropDownSerializer(cities, many=True)
         return Response({"message": "successfully fetched cities", "response": serializer.data}, status=status.HTTP_200_OK)
