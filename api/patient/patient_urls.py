@@ -9,5 +9,6 @@ urlpatterns = [
     path('delete/<str:patient_id>/', PatientAPIView.as_view(), name='patient_delete'), #single delete
 
     path('request/all/', RequestAPIView.as_view(), name='request_list'), #get
+    path('request/update/<str:request_id>/', RequestAPIView.as_view(), name='request_update'), #single patch
     
 ]
