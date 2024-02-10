@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from api.models import City
+from api.models import City, District
 from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer, CityDropDownSerializer
 
 class CityAPIView(APIView):
@@ -61,12 +61,11 @@ class CityAPIView(APIView):
 class CityDropDownView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        if not request.data.get('district'):
-            return Response({"message": "district is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not City.objects.filter(district=request.data.get('district')).exists():
-            return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        district = request.data.get('district')
-        cities = City.objects.filter(district=district)
+    def get(self, request, district_id):
+        if not District.objects.filter(id=district_id).exists():
+            return Response({"message": "district does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        if not City.objects.filter(district=district_id).exists():
+            return Response({"message": "No city is present for this district"}, status=status.HTTP_404_NOT_FOUND)
+        cities = City.objects.filter(district=district_id)
         serializer = CityDropDownSerializer(cities, many=True)
         return Response({"message": "successfully fetched cities", "response": serializer.data}, status=status.HTTP_200_OK)
