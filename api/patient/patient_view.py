@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer
+from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
 
 
 class PatientAPIView(APIView):
@@ -70,3 +70,27 @@ class PatientDropDownAPIView(APIView):
         patients = Patient.objects.all()
         serializer = PatientDropDownSerializer(patients, many=True)
         return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+class RequestAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        requests = Request.objects.all()
+        serializer = RequestListSerializer(requests, many=True)
+        return Response({"message": "successfully retrieved requests", "response": serializer.data}, status=status.HTTP_200_OK)
+    
+    def patch(self, request, request_id):
+        JWT_authenticator = JWTAuthentication()
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user , token = response
+            user_id = token.payload['user_id']
+        if not Request.objects.filter(id=request_id).exists():
+            return Response({"message": "request does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        patient_request = Request.objects.filter(id=request_id).first()
+        serializer = RequestUpdateSerializer(patient_request, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "successfully updated request", "response": serializer.data}, status=status.HTTP_200_OK)
+        return Response({"message": "failed to update request", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
