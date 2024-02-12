@@ -21,13 +21,13 @@ class RequestStatus(Enum):
     @classmethod
     def get_all_values(cls):
         return [member.value for member in cls]
-    
 
-class CustomResponse(Response):
-    def __init__(self, error=None, message=None, data=None, status_code=None, *args, **kwargs):
-        self.error = '' if error is None else error
+class CustomResponse():
+    def __init__(self, message, data):
         self.message = {} if message is None else message
         self.data = {} if data is None else data
-        self.status_code = status.HTTP_200_OK if status_code is 1 else status.HTTP_400_BAD_REQUEST
 
-        return super().__init__(data = {'error': self.error, 'message': self.message, 'data': self.data, 'status_code': self.status_code}, status=self.status_code, *args, **kwargs)
+    def success_response(self):
+        self.error = False
+        self.status_code = status.HTTP_200_OK
+        return Response({"error": self.error, "message": self.message, "data": self.data, "status_code": self.status_code}, status=self.status_code)
