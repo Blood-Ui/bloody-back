@@ -7,7 +7,6 @@ from django.db import transaction
 
 from api.models import Patient, Request
 from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
-from api.utils import CustomResponse
 
 
 class PatientAPIView(APIView):
@@ -67,15 +66,10 @@ class PatientAPIView(APIView):
 class PatientDropDownAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
-        # def get(self, request):
-    #     patients = Patient.objects.all()
-    #     serializer = PatientDropDownSerializer(patients, many=True)
-    #     return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
-
     def get(self, request):
         patients = Patient.objects.all()
         serializer = PatientDropDownSerializer(patients, many=True)
-        return CustomResponse(message={"general_message": "successfully retrieved patients"}, data=serializer.data).success_response()
+        return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
     
 class RequestAPIView(APIView):
     permission_classes = [IsAuthenticated]

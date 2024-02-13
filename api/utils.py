@@ -23,11 +23,16 @@ class RequestStatus(Enum):
         return [member.value for member in cls]
 
 class CustomResponse():
-    def __init__(self, message, data):
+    def __init__(self, message, data=None):
         self.message = {} if message is None else message
         self.data = {} if data is None else data
 
     def success_response(self):
         self.error = False
         self.status_code = status.HTTP_200_OK
+        return Response({"error": self.error, "message": self.message, "data": self.data, "status_code": self.status_code}, status=self.status_code)
+    
+    def failure_reponse(self):
+        self.error = True
+        self.status_code = status.HTTP_400_BAD_REQUEST
         return Response({"error": self.error, "message": self.message, "data": self.data, "status_code": self.status_code}, status=self.status_code)
