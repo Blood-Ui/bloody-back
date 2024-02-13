@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Blood_Group
+from api.utils import CustomResponse
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
@@ -14,7 +15,7 @@ class Blood_Group_DropdownAPIview(APIView):
     def get(self, request):
         blood_groups = Blood_Group.objects.all()
         serializer = BloodGroupDropDownSerizlizer(blood_groups, many=True)
-        return Response({"message": "successfully obtained blood groups", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained blood groups", data=serializer.data).success_response()
     
 class Blood_Group_APIview(APIView):
     permission_classes = [IsAuthenticated]
@@ -22,7 +23,7 @@ class Blood_Group_APIview(APIView):
     def get(self, request):
         blood_groups = Blood_Group.objects.all()
         serializer = BloodGroupListSerializer(blood_groups, many=True)
-        return Response({"message": "successfully obtained blood groups", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained blood groups", data=serializer.data).success_response()
     
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
@@ -34,8 +35,8 @@ class Blood_Group_APIview(APIView):
         serializer = BloodGroupCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created blood group", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to blood group", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created blood group", data=serializer.data).success_response()
+        return CustomResponse(message="failed to blood group", data=serializer.errors).failure_reponse()
     
     def patch(self, request, blood_group_id):
         JWT_authenticator = JWTAuthentication()
@@ -46,13 +47,13 @@ class Blood_Group_APIview(APIView):
             user_id = token.payload['user_id']
         
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
-            return Response({"message": "blood group not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="blood group not found").failure_reponse()
         blood_group = Blood_Group.objects.get(id=blood_group_id)
         serializer = BloodGroupCreateEditSerializer(blood_group, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated blood group", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update blood group", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated blood group", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update blood group", data=serializer.errors).failure_reponse()
     
     def delete(self, request, blood_group_id):
         JWT_authenticator = JWTAuthentication()
@@ -62,7 +63,7 @@ class Blood_Group_APIview(APIView):
             user , token = response
             user_id = token.payload['user_id']
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
-            return Response({"message": "blood group not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="blood group not found").failure_reponse()
         blood_group = Blood_Group.objects.get(id=blood_group_id)
         blood_group.delete()
-        return Response({"message": "successfully deleted blood group"}, status=status.HTTP_204_NO_CONTENT)
+        return CustomResponse(message="successfully deleted blood group").success_response()

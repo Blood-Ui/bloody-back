@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import City, District
+from api.utils import CustomResponse
 from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer, CityDropDownSerializer
 
 class CityAPIView(APIView):
@@ -21,13 +22,13 @@ class CityAPIView(APIView):
         serializer = CityCreateSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created city", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to create city", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created city", data=serializer.data).success_response()
+        return CustomResponse(message="failed to create city", data=serializer.errors).failure_reponse()
     
     def get(self, request):
         cities = City.objects.all()
         serializer = CityListSerializer(cities, many=True)
-        return Response({"message": "successfully fetched cities", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained cities", data=serializer.data).success_response()
     
     def patch(self, request, city_id):
         JWT_authenticator = JWTAuthentication()
@@ -37,13 +38,13 @@ class CityAPIView(APIView):
             user , token = response
             user_id = token.payload['user_id']
         if not City.objects.filter(id=city_id).exists():
-            return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="city does not exist").failure_reponse()
         city = City.objects.get(id=city_id)
         serializer = CityUpdateSerializer(city, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated city", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update city", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated city", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update city", data=serializer.errors).failure_reponse()
     
     def delete(self, request, city_id):
         JWT_authenticator = JWTAuthentication()
@@ -53,19 +54,19 @@ class CityAPIView(APIView):
             user , token = response
             user_id = token.payload['user_id']
         if not City.objects.filter(id=city_id).exists():
-            return Response({"message": "city does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="city does not exist").failure_reponse()
         city = City.objects.get(id=city_id)
         city.delete()
-        return Response({"message": "successfully deleted city"}, status=status.HTTP_204_NO_CONTENT)
+        return CustomResponse(message="successfully deleted city").success_response()
     
 class CityDropDownView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, district_id):
         if not District.objects.filter(id=district_id).exists():
-            return Response({"message": "district does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="district does not exist").failure_reponse()
         if not City.objects.filter(district=district_id).exists():
-            return Response({"message": "No city is present for this district"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="No city is present for this district").failure_reponse()
         cities = City.objects.filter(district=district_id)
         serializer = CityDropDownSerializer(cities, many=True)
-        return Response({"message": "successfully fetched cities", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained cities", data=serializer.data).success_response()
