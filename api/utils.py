@@ -23,7 +23,7 @@ class RequestStatus(Enum):
         return [member.value for member in cls]
 
 class CustomResponse():
-    def __init__(self, message, data=None):
+    def __init__(self, message=None, data=None):
         self.message = {} if message is None else message
         self.data = {} if data is None else data
 

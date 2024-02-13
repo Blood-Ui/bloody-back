@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
+from api.utils import CustomResponse
 from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
 
 
@@ -27,11 +28,11 @@ class PatientAPIView(APIView):
                 serializer.save()
                 if Request.objects.filter(patient_id=serializer.data['id']).exists() :
                     request_created = True
-                    return Response({"message": "successfully created patient", "response": serializer.data, "request_created": request_created}, status=status.HTTP_201_CREATED)
+                    return CustomResponse(message={"message": "successfully created patient", "request_created": request_created}, data=serializer.data).success_response()
                 else:
                     transaction.set_rollback(True)
-                    return Response({"message": "failed to create patient", "response": "request was not generated", "request_created": request_created}, status=status.HTTP_201_CREATED)
-            return Response({"message": "failed to create patient", "response": serializer.errors, "request_created": request_created}, status=status.HTTP_400_BAD_REQUEST)
+                    return CustomResponse(message={"message": "failed to create patient", "response": "request was not generated", "request_created": request_created}, data=serializer.errors).failure_reponse()
+            return CustomResponse(message={"message": "failed to create patient", "request_created": request_created}, data=serializer.errors).failure_reponse()
 
     def patch(self, request, patient_id):
         JWT_authenticator = JWTAuthentication()
@@ -42,26 +43,25 @@ class PatientAPIView(APIView):
             user_id = token.payload['user_id']
         
         if not Patient.objects.filter(id=patient_id).exists():
-            return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="patient does not exist").failure_reponse()
         patient = Patient.objects.filter(id=patient_id).first()
         serializer = PatientUpdateSerializer(patient, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated patient", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update patient", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated patient", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update patient", data=serializer.errors).failure_reponse()
     
     def get(self, request):
         patients = Patient.objects.all()
         serializer = PatientListSerializer(patients, many=True)
-        return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained patients", data=serializer.data).success_response()
     
     def delete(self, request, patient_id):
         if not Patient.objects.filter(id=patient_id).exists():
-            return Response({"message": "patient does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="patient does not exist").failure_reponse()
         patient = Patient.objects.filter(id=patient_id).first()
-
         patient.delete()
-        return Response({"message": "successfully deleted patient"}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully deleted patient").success_response()
     
 class PatientDropDownAPIView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -69,7 +69,7 @@ class PatientDropDownAPIView(APIView):
     def get(self, request):
         patients = Patient.objects.all()
         serializer = PatientDropDownSerializer(patients, many=True)
-        return Response({"message": "successfully retrieved patients", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained patients", data=serializer.data).success_response()
     
 class RequestAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -77,7 +77,7 @@ class RequestAPIView(APIView):
     def get(self, request):
         requests = Request.objects.all()
         serializer = RequestListSerializer(requests, many=True)
-        return Response({"message": "successfully retrieved requests", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained requests", data=serializer.data).success_response()
     
     def patch(self, request, request_id):
         JWT_authenticator = JWTAuthentication()
@@ -87,10 +87,10 @@ class RequestAPIView(APIView):
             user , token = response
             user_id = token.payload['user_id']
         if not Request.objects.filter(id=request_id).exists():
-            return Response({"message": "request does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="request does not exist").failure_reponse()
         patient_request = Request.objects.filter(id=request_id).first()
         serializer = RequestUpdateSerializer(patient_request, data=request.data, context={"request": request, "user_id": user_id}, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated request", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update request", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated request", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update request", data=serializer.errors).failure_reponse()

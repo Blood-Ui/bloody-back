@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Role, UserRoleLink
+from api.utils import CustomResponse
 from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer, UserRoleCreateSerializer, UserRoleUpdateSerializer
 
 
@@ -15,7 +16,7 @@ class RoleDropDownAPIView(APIView):
     def get(self, request):
         roles = Role.objects.all()
         serializer = RoleDropDownSerializer(roles, many=True)
-        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained roles", data=serializer.data).success_response()
 
 class RoleAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -23,7 +24,7 @@ class RoleAPIView(APIView):
     def get(self, request):
         roles = Role.objects.all()
         serializer = RoleListSerializer(roles, many=True)
-        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained roles", data=serializer.data).success_response()
     
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
@@ -36,8 +37,8 @@ class RoleAPIView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created role", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to create role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created role", data=serializer.data).success_response()
+        return CustomResponse(message="failed to create role", data=serializer.errors).failure_reponse()
     
     def patch(self, request, role_id):
         JWT_authenticator = JWTAuthentication()
@@ -48,12 +49,12 @@ class RoleAPIView(APIView):
             user_id = token.payload['user_id']
         role = Role.objects.filter(id=role_id).first()
         if not role:
-            return Response({"message": "role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="role does not exist").failure_reponse()
         serializer = RoleCreateEditSerializer(role, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated role", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated role", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update role", data=serializer.errors).failure_reponse()
     
     def delete(self, request, role_id):
         JWT_authenticator = JWTAuthentication()
@@ -64,9 +65,9 @@ class RoleAPIView(APIView):
             user_id = token.payload['user_id']
         role = Role.objects.filter(id=role_id).first()
         if not role:
-            return Response({"message": "role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="role does not exist").failure_reponse()
         role.delete()
-        return Response({"message": "successfully deleted role"}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully deleted role").success_response()
     
 class UserRoleView(APIView):
     permission_classes = [IsAuthenticated]
@@ -74,7 +75,7 @@ class UserRoleView(APIView):
     def get(self, request):
         user_roles = UserRoleLink.objects.all()
         serializer = UserRoleListSerializer(user_roles, many=True)
-        return Response({"message": "successfully obtained roles", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained roles", data=serializer.data).success_response()
     
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
@@ -87,8 +88,8 @@ class UserRoleView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created role", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to create role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created role", data=serializer.data).success_response()
+        return CustomResponse(message="failed to create role", data=serializer.errors).failure_reponse()
     
     def patch(self, request, user_role_id):
         JWT_authenticator = JWTAuthentication()
@@ -99,12 +100,12 @@ class UserRoleView(APIView):
             user_id = token.payload['user_id']
         user_role = UserRoleLink.objects.filter(id=user_role_id).first()
         if not user_role:
-            return Response({"message": "user role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="user role does not exist").failure_reponse()
         serializer = UserRoleUpdateSerializer(user_role, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated role", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update role", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated role", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update role", data=serializer.errors).failure_reponse()
     
     def delete(self, request, user_role_id):
         JWT_authenticator = JWTAuthentication()
@@ -115,6 +116,6 @@ class UserRoleView(APIView):
             user_id = token.payload['user_id']
         user_role = UserRoleLink.objects.filter(id=user_role_id).first()
         if not user_role:
-            return Response({"message": "user role does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="user role does not exist").failure_reponse()
         user_role.delete()
-        return Response({"message": "successfully deleted role"}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully deleted role").success_response()

@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Donor
+from api.utils import CustomResponse
 from .donor_serializer import DonorCreateSerializer, DonorUpdateSerializer, DonorListSerializer, DonorDropDownSerializer
 
 
@@ -22,13 +23,13 @@ class DonorAPIView(APIView):
         serializer = DonorCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created donor", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to create donor", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created donor", data=serializer.data).success_response()
+        return CustomResponse(message="failed to create donor", data=serializer.errors).failure_reponse()
     
     def get(self, request):
         donors = Donor.objects.all()
         serializer = DonorListSerializer(donors, many=True)
-        return Response({"message": "successfully fetched donors", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained donors", data=serializer.data).success_response()
     
     def patch(self, request, donor_id):
         JWT_authenticator = JWTAuthentication()
@@ -39,20 +40,20 @@ class DonorAPIView(APIView):
             user_id = token.payload['user_id']
 
         if not Donor.objects.filter(id=donor_id).exists():
-            return Response({"message": "donor not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="donor not found").failure_reponse()
         donor = Donor.objects.get(id=donor_id)
         serializer = DonorUpdateSerializer(donor, data=request.data, context={"request": request, "user_id": user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated donor", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to update donor", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated donor", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update donor", data=serializer.errors).failure_reponse()
     
     def delete(self, request, donor_id):
         if not Donor.objects.filter(id=donor_id).exists():
-            return Response({"message": "donor not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="donor not found").failure_reponse()
         donor = Donor.objects.get(id=donor_id)
         donor.delete()
-        return Response({"message": "successfully deleted donor"}, status=status.HTTP_204_NO_CONTENT)
+        return CustomResponse(message="successfully deleted donor").success_response()
     
 class DonorDropDownAPIView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -60,4 +61,4 @@ class DonorDropDownAPIView(APIView):
     def get(self, request):
         donors = Donor.objects.all()
         serializer = DonorDropDownSerializer(donors, many=True)
-        return Response({"message": "successfully fetched donors", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained donors", data=serializer.data).success_response()

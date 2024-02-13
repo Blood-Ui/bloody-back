@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import District
+from api.utils import CustomResponse
 from .district_serializer import DistrictCreateEditSerializer, DistrictListSerializer, DistrictDropDownSerializer
 
 class DistrictAPIView(APIView):
@@ -14,7 +15,7 @@ class DistrictAPIView(APIView):
     def get(self, request):
         districts = District.objects.all()
         serializer = DistrictListSerializer(districts, many=True)
-        return Response({"message": "successfully fetched districts", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained districts", data=serializer.data).success_response()
 
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
@@ -26,8 +27,8 @@ class DistrictAPIView(APIView):
         serializer = DistrictCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully created district", "response": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"message": "failed to create district", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully created district", data=serializer.data).success_response()
+        return CustomResponse(message="failed to create district", data=serializer.errors).failure_reponse()
     
     def patch(self, request, district_id):
         JWT_authenticator = JWTAuthentication()
@@ -38,13 +39,13 @@ class DistrictAPIView(APIView):
             user_id = token.payload['user_id']
 
         if not District.objects.filter(id=district_id).exists():
-            return Response({"message": "district not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="district not found").failure_reponse()
         district = District.objects.get(id=district_id)
         serializer = DistrictCreateEditSerializer(district, data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "successfully updated district", "response": serializer.data}, status=status.HTTP_200_OK)
-        return Response({"message": "failed to update district", "response": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(message="successfully updated district", data=serializer.data).success_response()
+        return CustomResponse(message="failed to update district", data=serializer.errors).failure_reponse()
     
     def delete(self, request, district_id):
         JWT_authenticator = JWTAuthentication()
@@ -55,10 +56,10 @@ class DistrictAPIView(APIView):
             user_id = token.payload['user_id']
         
         if not District.objects.filter(id=district_id).exists():
-            return Response({"message": "district not found"}, status=status.HTTP_404_NOT_FOUND)
+            return CustomResponse(message="district not found").failure_reponse()
         district = District.objects.get(id=district_id)
         district.delete()
-        return Response({"message": "successfully deleted district"}, status=status.HTTP_204_NO_CONTENT)
+        return CustomResponse(message="successfully deleted district").success_response()
     
 class DistrictDropDownAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -66,4 +67,4 @@ class DistrictDropDownAPIView(APIView):
     def get(self, request):
         districts = District.objects.all()
         serializer = DistrictDropDownSerializer(districts, many=True)
-        return Response({"message": "successfully fetched districts", "response": serializer.data}, status=status.HTTP_200_OK)
+        return CustomResponse(message="successfully obtained districts", data=serializer.data).success_response()
