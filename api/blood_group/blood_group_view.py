@@ -3,10 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Blood_Group
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
@@ -26,12 +25,7 @@ class Blood_Group_APIview(APIView):
         return CustomResponse(message="successfully obtained blood groups", data=serializer.data).success_response()
     
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         serializer = BloodGroupCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
@@ -39,13 +33,7 @@ class Blood_Group_APIview(APIView):
         return CustomResponse(message="failed to blood group", data=serializer.errors).failure_reponse()
     
     def patch(self, request, blood_group_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-        
+        user_id = get_user_id(request)
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
             return CustomResponse(message="blood group not found").failure_reponse()
         blood_group = Blood_Group.objects.get(id=blood_group_id)
@@ -56,12 +44,6 @@ class Blood_Group_APIview(APIView):
         return CustomResponse(message="failed to update blood group", data=serializer.errors).failure_reponse()
     
     def delete(self, request, blood_group_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
             return CustomResponse(message="blood group not found").failure_reponse()
         blood_group = Blood_Group.objects.get(id=blood_group_id)

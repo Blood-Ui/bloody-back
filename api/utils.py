@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from enum import Enum
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def allowed_roles(allowed_roles):
     def decorator(func):
@@ -36,3 +37,13 @@ class CustomResponse():
         self.error = True
         self.status_code = status.HTTP_400_BAD_REQUEST
         return Response({"error": self.error, "message": self.message, "data": self.data, "status_code": self.status_code}, status=self.status_code)
+    
+def get_user_id(request):
+    JWT_authenticator = JWTAuthentication()
+    response = JWT_authenticator.authenticate(request)
+    if response is not None:
+        # unpacking
+        user , token = response
+        user_id = token.payload['user_id']
+        return user_id
+    return None

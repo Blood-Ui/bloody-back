@@ -5,20 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import City, District
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .city_serializer import CityCreateSerializer, CityListSerializer, CityUpdateSerializer, CityDropDownSerializer
 
 class CityAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-        
+        user_id = get_user_id(request)
         serializer = CityCreateSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
@@ -31,12 +25,7 @@ class CityAPIView(APIView):
         return CustomResponse(message="successfully obtained cities", data=serializer.data).success_response()
     
     def patch(self, request, city_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         if not City.objects.filter(id=city_id).exists():
             return CustomResponse(message="city does not exist").failure_reponse()
         city = City.objects.get(id=city_id)
@@ -47,12 +36,6 @@ class CityAPIView(APIView):
         return CustomResponse(message="failed to update city", data=serializer.errors).failure_reponse()
     
     def delete(self, request, city_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
         if not City.objects.filter(id=city_id).exists():
             return CustomResponse(message="city does not exist").failure_reponse()
         city = City.objects.get(id=city_id)

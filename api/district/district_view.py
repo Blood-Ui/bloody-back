@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import District
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .district_serializer import DistrictCreateEditSerializer, DistrictListSerializer, DistrictDropDownSerializer
 
 class DistrictAPIView(APIView):
@@ -18,12 +18,7 @@ class DistrictAPIView(APIView):
         return CustomResponse(message="successfully obtained districts", data=serializer.data).success_response()
 
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         serializer = DistrictCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
         if serializer.is_valid():
             serializer.save()
@@ -31,13 +26,7 @@ class DistrictAPIView(APIView):
         return CustomResponse(message="failed to create district", data=serializer.errors).failure_reponse()
     
     def patch(self, request, district_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-
+        user_id = get_user_id(request)
         if not District.objects.filter(id=district_id).exists():
             return CustomResponse(message="district not found").failure_reponse()
         district = District.objects.get(id=district_id)
@@ -48,13 +37,6 @@ class DistrictAPIView(APIView):
         return CustomResponse(message="failed to update district", data=serializer.errors).failure_reponse()
     
     def delete(self, request, district_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-        
         if not District.objects.filter(id=district_id).exists():
             return CustomResponse(message="district not found").failure_reponse()
         district = District.objects.get(id=district_id)
