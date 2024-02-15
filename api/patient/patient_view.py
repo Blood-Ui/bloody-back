@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 
 from api.models import Patient, Request
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
 
 
@@ -14,13 +14,7 @@ class PatientAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-
+        user_id = get_user_id(request)
         serializer = PatientCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         with transaction.atomic():
             request_created = False
@@ -35,13 +29,7 @@ class PatientAPIView(APIView):
             return CustomResponse(message={"message": "failed to create patient", "request_created": request_created}, data=serializer.errors).failure_reponse()
 
     def patch(self, request, patient_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-        
+        user_id = get_user_id(request)
         if not Patient.objects.filter(id=patient_id).exists():
             return CustomResponse(message="patient does not exist").failure_reponse()
         patient = Patient.objects.filter(id=patient_id).first()
@@ -80,12 +68,7 @@ class RequestAPIView(APIView):
         return CustomResponse(message="successfully obtained requests", data=serializer.data).success_response()
     
     def patch(self, request, request_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         if not Request.objects.filter(id=request_id).exists():
             return CustomResponse(message="request does not exist").failure_reponse()
         patient_request = Request.objects.filter(id=request_id).first()

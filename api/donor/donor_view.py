@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Donor
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .donor_serializer import DonorCreateSerializer, DonorUpdateSerializer, DonorListSerializer, DonorDropDownSerializer
 
 
@@ -13,13 +13,7 @@ class DonorAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-
+        user_id = get_user_id(request)
         serializer = DonorCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
         if serializer.is_valid():
             serializer.save()
@@ -32,13 +26,7 @@ class DonorAPIView(APIView):
         return CustomResponse(message="successfully obtained donors", data=serializer.data).success_response()
     
     def patch(self, request, donor_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
-
+        user_id = get_user_id(request)
         if not Donor.objects.filter(id=donor_id).exists():
             return CustomResponse(message="donor not found").failure_reponse()
         donor = Donor.objects.get(id=donor_id)

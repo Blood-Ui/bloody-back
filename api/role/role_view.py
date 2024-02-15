@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api.models import Role, UserRoleLink
-from api.utils import CustomResponse
+from api.utils import CustomResponse, get_user_id
 from .role_serializer import RoleDropDownSerializer, RoleListSerializer, RoleCreateEditSerializer, UserRoleListSerializer, UserRoleCreateSerializer, UserRoleUpdateSerializer
 
 
@@ -27,12 +27,7 @@ class RoleAPIView(APIView):
         return CustomResponse(message="successfully obtained roles", data=serializer.data).success_response()
     
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         serializer = RoleCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
 
         if serializer.is_valid():
@@ -41,12 +36,7 @@ class RoleAPIView(APIView):
         return CustomResponse(message="failed to create role", data=serializer.errors).failure_reponse()
     
     def patch(self, request, role_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         role = Role.objects.filter(id=role_id).first()
         if not role:
             return CustomResponse(message="role does not exist").failure_reponse()
@@ -57,12 +47,6 @@ class RoleAPIView(APIView):
         return CustomResponse(message="failed to update role", data=serializer.errors).failure_reponse()
     
     def delete(self, request, role_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
         role = Role.objects.filter(id=role_id).first()
         if not role:
             return CustomResponse(message="role does not exist").failure_reponse()
@@ -78,12 +62,7 @@ class UserRoleView(APIView):
         return CustomResponse(message="successfully obtained roles", data=serializer.data).success_response()
     
     def post(self, request):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         serializer = UserRoleCreateSerializer(data=request.data, context={'request': request, 'user_id': user_id})
 
         if serializer.is_valid():
@@ -92,12 +71,7 @@ class UserRoleView(APIView):
         return CustomResponse(message="failed to create role", data=serializer.errors).failure_reponse()
     
     def patch(self, request, user_role_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
+        user_id = get_user_id(request)
         user_role = UserRoleLink.objects.filter(id=user_role_id).first()
         if not user_role:
             return CustomResponse(message="user role does not exist").failure_reponse()
@@ -108,12 +82,6 @@ class UserRoleView(APIView):
         return CustomResponse(message="failed to update role", data=serializer.errors).failure_reponse()
     
     def delete(self, request, user_role_id):
-        JWT_authenticator = JWTAuthentication()
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user , token = response
-            user_id = token.payload['user_id']
         user_role = UserRoleLink.objects.filter(id=user_role_id).first()
         if not user_role:
             return CustomResponse(message="user role does not exist").failure_reponse()
