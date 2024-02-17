@@ -8,9 +8,17 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import smart_bytes, force_str
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .utils import send_normal_email
 
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        user_roles = user.user_role_link.all()
+        token['roles'] = [user_role.role.name for user_role in user_roles]
+        return token
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
@@ -57,12 +65,13 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user.is_verified:
             raise AuthenticationFailed("Email is not verified")
         
-        user_tokens = user.tokens()
+        tokens = MyTokenObtainPairSerializer.get_token(user)
+
         return {
             'email': user.email,
             'full_name': user.get_full_name,
-            'access_token': str(user_tokens.get('access')),
-            'refresh_token': str(user_tokens.get('refresh'))
+            'access_token': str(tokens.access_token),
+            'refresh_token': str(tokens)
         }
     
 class PasswordResetRequestSerializer(serializers.Serializer):
