@@ -3,13 +3,14 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
 from api.models import Patient, Request
-from api.utils import CustomResponse, get_user_id
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles
 from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
 
 
 class PatientAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @allowed_roles([RoleList.ADMIN.value])
     def post(self, request):
         user_id = get_user_id(request)
         serializer = PatientCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
@@ -25,6 +26,7 @@ class PatientAPIView(APIView):
                     return CustomResponse(message={"message": "failed to create patient", "response": "request was not generated", "request_created": request_created}, data=serializer.errors).failure_reponse()
             return CustomResponse(message={"message": "failed to create patient", "request_created": request_created}, data=serializer.errors).failure_reponse()
 
+    @allowed_roles([RoleList.ADMIN.value])
     def patch(self, request, patient_id):
         user_id = get_user_id(request)
         if not Patient.objects.filter(id=patient_id).exists():
@@ -36,11 +38,13 @@ class PatientAPIView(APIView):
             return CustomResponse(message="successfully updated patient", data=serializer.data).success_response()
         return CustomResponse(message="failed to update patient", data=serializer.errors).failure_reponse()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         patients = Patient.objects.all()
         serializer = PatientListSerializer(patients, many=True)
         return CustomResponse(message="successfully obtained patients", data=serializer.data).success_response()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def delete(self, request, patient_id):
         if not Patient.objects.filter(id=patient_id).exists():
             return CustomResponse(message="patient does not exist").failure_reponse()
@@ -51,6 +55,7 @@ class PatientAPIView(APIView):
 class PatientDropDownAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         patients = Patient.objects.all()
         serializer = PatientDropDownSerializer(patients, many=True)
@@ -59,11 +64,13 @@ class PatientDropDownAPIView(APIView):
 class RequestAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         requests = Request.objects.all()
         serializer = RequestListSerializer(requests, many=True)
         return CustomResponse(message="successfully obtained requests", data=serializer.data).success_response()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def patch(self, request, request_id):
         user_id = get_user_id(request)
         if not Request.objects.filter(id=request_id).exists():

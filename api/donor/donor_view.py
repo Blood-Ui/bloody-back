@@ -2,13 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from api.models import Donor
-from api.utils import CustomResponse, get_user_id
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles
 from .donor_serializer import DonorCreateSerializer, DonorUpdateSerializer, DonorListSerializer, DonorDropDownSerializer
 
 
 class DonorAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @allowed_roles([RoleList.ADMIN.value])
     def post(self, request):
         user_id = get_user_id(request)
         serializer = DonorCreateSerializer(data=request.data, context={"request": request, "user_id": user_id})
@@ -17,11 +18,13 @@ class DonorAPIView(APIView):
             return CustomResponse(message="successfully created donor", data=serializer.data).success_response()
         return CustomResponse(message="failed to create donor", data=serializer.errors).failure_reponse()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         donors = Donor.objects.all()
         serializer = DonorListSerializer(donors, many=True)
         return CustomResponse(message="successfully obtained donors", data=serializer.data).success_response()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def patch(self, request, donor_id):
         user_id = get_user_id(request)
         if not Donor.objects.filter(id=donor_id).exists():
@@ -33,6 +36,7 @@ class DonorAPIView(APIView):
             return CustomResponse(message="successfully updated donor", data=serializer.data).success_response()
         return CustomResponse(message="failed to update donor", data=serializer.errors).failure_reponse()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def delete(self, request, donor_id):
         if not Donor.objects.filter(id=donor_id).exists():
             return CustomResponse(message="donor not found").failure_reponse()
@@ -43,6 +47,7 @@ class DonorAPIView(APIView):
 class DonorDropDownAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         donors = Donor.objects.all()
         serializer = DonorDropDownSerializer(donors, many=True)

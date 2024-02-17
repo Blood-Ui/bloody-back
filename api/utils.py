@@ -3,25 +3,6 @@ from rest_framework import status
 from enum import Enum
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-def allowed_roles(allowed_roles):
-    def decorator(func):
-        def wrapper(request, *args, **kwargs):
-            if request.user.role not in allowed_roles:
-                return Response({"error": "You don't have permission to perform this action."}, status=403)
-            return func(request, *args, **kwargs)
-        return wrapper
-    return decorator
-
-class RequestStatus(Enum):
-    OPEN = 'open'
-    INPROGRESS = 'in_progress'
-    APPROVED = 'approved'
-    CANCELLED = 'cancelled'
-    CLOSED = 'closed'
-
-    @classmethod
-    def get_all_values(cls):
-        return [member.value for member in cls]
 
 class CustomResponse():
     def __init__(self, message=None, data=None):
@@ -47,3 +28,46 @@ def get_user_id(request):
         user_id = token.payload['user_id']
         return user_id
     return None
+
+def get_user_role(request):
+    JWT_authenticator = JWTAuthentication()
+    response = JWT_authenticator.authenticate(request)
+    if response is not None:
+        # unpacking
+        user , token = response
+        user_role = token.payload['roles']
+        return user_role
+    return None
+
+class RequestStatus(Enum):
+    OPEN = 'open'
+    INPROGRESS = 'in_progress'
+    APPROVED = 'approved'
+    CANCELLED = 'cancelled'
+    CLOSED = 'closed'
+
+    @classmethod
+    def get_all_values(cls):
+        return [member.value for member in cls]
+    
+class RoleList(Enum):
+    ADMIN = 'admin'
+    INCHARGE = 'incharge'
+    NORMAL_USER = 'normal_user'
+
+    @classmethod
+    def get_all_values(cls):
+        return [member.value for member in cls]
+    
+def allowed_roles(allowed_roles):
+    def decorator(func):
+        def wrapper(obj, request, *args, **kwargs):
+            user_roles = get_user_role(request) 
+            flag = False
+            for user_role in user_roles:
+                if user_role in allowed_roles:
+                    return func(obj, request, *args, **kwargs)
+            if not flag:
+                return CustomResponse(message="You don't have permission to perform this action").failure_reponse()
+        return wrapper
+    return decorator
