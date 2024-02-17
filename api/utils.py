@@ -47,3 +47,13 @@ def get_user_id(request):
         user_id = token.payload['user_id']
         return user_id
     return None
+
+def get_user_role(request):
+    JWT_authenticator = JWTAuthentication()
+    response = JWT_authenticator.authenticate(request)
+    if response is not None:
+        # unpacking
+        user , token = response
+        user_role = token.payload['roles']
+        return user_role
+    return None
