@@ -65,12 +65,13 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user.is_verified:
             raise AuthenticationFailed("Email is not verified")
         
-        user_tokens = user.tokens()
+        tokens = MyTokenObtainPairSerializer.get_token(user)
+
         return {
             'email': user.email,
             'full_name': user.get_full_name,
-            'access_token': str(user_tokens.get('access')),
-            'refresh_token': str(user_tokens.get('refresh'))
+            'access_token': str(tokens.access_token),
+            'refresh_token': str(tokens)
         }
     
 class PasswordResetRequestSerializer(serializers.Serializer):
