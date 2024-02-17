@@ -3,16 +3,6 @@ from rest_framework import status
 from enum import Enum
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from api.models import Role
-
-def allowed_roles(allowed_roles):
-    def decorator(func):
-        def wrapper(request, *args, **kwargs):
-            if request.user.role not in allowed_roles:
-                return Response({"error": "You don't have permission to perform this action."}, status=403)
-            return func(request, *args, **kwargs)
-        return wrapper
-    return decorator
 
 class CustomResponse():
     def __init__(self, message=None, data=None):
@@ -68,3 +58,16 @@ class RoleList(Enum):
     @classmethod
     def get_all_values(cls):
         return [member.value for member in cls]
+    
+def allowed_roles(allowed_roles):
+    def decorator(func):
+        def wrapper(obj, request, *args, **kwargs):
+            user_roles = get_user_role(request) 
+            flag = False
+            for user_role in user_roles:
+                if user_role in allowed_roles:
+                    return func(obj, request, *args, **kwargs)
+            if not flag:
+                return CustomResponse(message="You don't have permission to perform this action").failure_reponse()
+        return wrapper
+    return decorator
