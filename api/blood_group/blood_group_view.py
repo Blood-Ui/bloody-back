@@ -2,12 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from api.models import Blood_Group
-from api.utils import CustomResponse, get_user_id
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
     permission_classes = [IsAuthenticated]
 
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         blood_groups = Blood_Group.objects.all()
         serializer = BloodGroupDropDownSerizlizer(blood_groups, many=True)
@@ -16,11 +17,13 @@ class Blood_Group_DropdownAPIview(APIView):
 class Blood_Group_APIview(APIView):
     permission_classes = [IsAuthenticated]
 
+    @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
         blood_groups = Blood_Group.objects.all()
         serializer = BloodGroupListSerializer(blood_groups, many=True)
         return CustomResponse(message="successfully obtained blood groups", data=serializer.data).success_response()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def post(self, request):
         user_id = get_user_id(request)
         serializer = BloodGroupCreateEditSerializer(data=request.data, context={'request': request, 'user_id': user_id})
@@ -29,6 +32,7 @@ class Blood_Group_APIview(APIView):
             return CustomResponse(message="successfully created blood group", data=serializer.data).success_response()
         return CustomResponse(message="failed to blood group", data=serializer.errors).failure_reponse()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def patch(self, request, blood_group_id):
         user_id = get_user_id(request)
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
@@ -40,6 +44,7 @@ class Blood_Group_APIview(APIView):
             return CustomResponse(message="successfully updated blood group", data=serializer.data).success_response()
         return CustomResponse(message="failed to update blood group", data=serializer.errors).failure_reponse()
     
+    @allowed_roles([RoleList.ADMIN.value])
     def delete(self, request, blood_group_id):
         if not Blood_Group.objects.filter(id=blood_group_id).exists():
             return CustomResponse(message="blood group not found").failure_reponse()
