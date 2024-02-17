@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
 from api.models import Patient, Request
-from api.utils import CustomResponse, get_user_id, get_user_role
+from api.utils import CustomResponse, get_user_id
 from .patient_serializer import PatientCreateSerializer, PatientListSerializer, PatientDropDownSerializer, PatientUpdateSerializer, RequestListSerializer, RequestUpdateSerializer
 
 
@@ -37,7 +37,6 @@ class PatientAPIView(APIView):
         return CustomResponse(message="failed to update patient", data=serializer.errors).failure_reponse()
     
     def get(self, request):
-        print(get_user_role(request))
         patients = Patient.objects.all()
         serializer = PatientListSerializer(patients, many=True)
         return CustomResponse(message="successfully obtained patients", data=serializer.data).success_response()

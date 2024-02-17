@@ -3,6 +3,8 @@ from rest_framework import status
 from enum import Enum
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from api.models import Role
+
 def allowed_roles(allowed_roles):
     def decorator(func):
         def wrapper(request, *args, **kwargs):
@@ -11,17 +13,6 @@ def allowed_roles(allowed_roles):
             return func(request, *args, **kwargs)
         return wrapper
     return decorator
-
-class RequestStatus(Enum):
-    OPEN = 'open'
-    INPROGRESS = 'in_progress'
-    APPROVED = 'approved'
-    CANCELLED = 'cancelled'
-    CLOSED = 'closed'
-
-    @classmethod
-    def get_all_values(cls):
-        return [member.value for member in cls]
 
 class CustomResponse():
     def __init__(self, message=None, data=None):
@@ -57,3 +48,23 @@ def get_user_role(request):
         user_role = token.payload['roles']
         return user_role
     return None
+
+class RequestStatus(Enum):
+    OPEN = 'open'
+    INPROGRESS = 'in_progress'
+    APPROVED = 'approved'
+    CANCELLED = 'cancelled'
+    CLOSED = 'closed'
+
+    @classmethod
+    def get_all_values(cls):
+        return [member.value for member in cls]
+    
+class RoleList(Enum):
+    ADMIN = 'admin'
+    INCHARGE = 'incharge'
+    NORMAL_USER = 'normal_user'
+
+    @classmethod
+    def get_all_values(cls):
+        return [member.value for member in cls]
