@@ -62,7 +62,7 @@ class DistrictBaseTemplateAPIView(APIView):
         sheet_names = ['Sheet1']
         headers = [['name']]
         column_widths = {'A': 35}
-        filename = "district_template.xlsx"
+        filename = "district_base_template.xlsx"
         
         response = generate_excel_template(sheet_names, filename, headers, column_widths)
         return response

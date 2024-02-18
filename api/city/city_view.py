@@ -77,12 +77,18 @@ class CityBulkImportAPIView(APIView):
             if header not in excel_data[0]:
                 return CustomResponse(message=f"Please provide the {header} in the file.").failure_reponse()
             
+        error_rows = []
         for index, data in enumerate(excel_data[1:]):
             district_name = data.pop('district')
             if not District.objects.filter(name=district_name).exists():
-                return CustomResponse(message=f"In row index {index + 2} given district does not exist").failure_reponse()
+                error_rows.append({"row_index": index + 2, "error": "district does not exist"})
+                continue
+            if error_rows:
+                continue
             district = District.objects.get(name=district_name)
             data['district'] = district.id
+        if error_rows:
+            return CustomResponse(message="failed to import cities", data=error_rows).failure_reponse()
         user_id = get_user_id(request)
         serializer = CityCreateSerializer(data=excel_data[1:], context={'request': request, 'user_id': user_id}, many=True)
         with transaction.atomic():

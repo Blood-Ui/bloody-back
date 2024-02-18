@@ -100,7 +100,7 @@ class Blood_Group_Base_Template_APIview(APIView):
         sheet_names = ['Sheet1']
         headers = [['name']]
         column_widths = {'A': 20}
-        filename = "blood_group_template.xlsx"
+        filename = "blood_group_base_template.xlsx"
 
         response = generate_excel_template(sheet_names, filename, headers, column_widths)
         return response
