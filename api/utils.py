@@ -3,8 +3,11 @@ from rest_framework import status
 from enum import Enum
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import io
-from openpyxl import load_workbook
-from django.utils.translation import gettext_lazy as _
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Font
+from django.http import FileResponse
+from tempfile import NamedTemporaryFile
+from io import BytesIO
 
 
 class CustomResponse():
@@ -88,3 +91,32 @@ def get_excel_data(excel_file):
             excel_data.append(row_data)
 
     return excel_data
+
+def generate_excel_template(sheet_names, headers, data_dict, column_widths, filename):
+    wb = Workbook()
+    bold_font = Font(bold=True)
+    for i, sheet_name in enumerate(sheet_names):
+        ws = wb.create_sheet(sheet_name)
+        # Write headers
+        ws.append(headers[i])
+        for cell in ws[1]:
+            cell.font = bold_font
+        if column_widths:
+            for col, width in column_widths.items():
+                ws.column_dimensions[col].width = width
+        # Write data
+        data = data_dict.get(sheet_name, [])  # Handle missing sheets gracefully
+        if data:
+            for col_num, (col_name, col_values) in enumerate(data.items(), start=1):
+                for row, value in enumerate(col_values, start=2):
+                    print(row, col_num, value)
+                    ws.cell(row=row, column=col_num, value=value)
+
+    del wb['Sheet']  # Remove default sheet
+    with NamedTemporaryFile() as tmp:
+        tmp.close() # with statement opened tmp, close it so wb.save can open it
+        wb.save(tmp.name)
+        with open(tmp.name, 'rb') as f:
+            new_file_object = f.read()
+
+    return FileResponse(BytesIO(new_file_object), as_attachment=True, filename=filename)
