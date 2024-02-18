@@ -1,5 +1,5 @@
 from django.urls import path
-from .city_view import CityAPIView, CityDropDownView
+from .city_view import CityAPIView, CityDropDownView, CityBulkImportAPIView
 
 urlpatterns = [
     path('drop-down/<str:district_id>/', CityDropDownView.as_view(), name='city_list'), #drop down
@@ -8,4 +8,5 @@ urlpatterns = [
     path('update/<str:city_id>/', CityAPIView.as_view(), name='city_update'), #single patch
     path('delete/<str:city_id>/', CityAPIView.as_view(), name='city_delete'), #single delete
     
+    path('bulk-import/', CityBulkImportAPIView.as_view(), name='city_bulk_import'), #bulk post
 ]

@@ -84,6 +84,5 @@ class Blood_Group_Bulk_Import_APIview(APIView):
                 return CustomResponse(message="successfully imported blood groups", data=serializer.data).success_response()
         errors_with_indices = []
         for index, error in enumerate(serializer.errors):
-            errors_with_indices.append({"row_index": index + 1, "error": error if error else "no error"})  # Adjust index for headers
-
+            errors_with_indices.append({"row_index": index + 2, "error": error if error else "no error"})  # Adjust index for headers
         return CustomResponse(message="failed to import blood groups", data=errors_with_indices).failure_reponse()
