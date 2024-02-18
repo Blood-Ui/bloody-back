@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 import openpyxl
 
 from api.models import Blood_Group
-from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
@@ -59,28 +59,20 @@ class Blood_Group_Bulk_Import_APIview(APIView):
     @allowed_roles([RoleList.ADMIN.value])
     def post(self, request):
         try:
-            excel_file = request.FILES['blood_groups']
-            if not excel_file.name.endswith('.xlsx'):
-                return CustomResponse(message="file type not supported").failure_reponse()
+            excel_file = request.FILES["blood_groups"]
         except:
             return CustomResponse(message="file not found").failure_reponse()
+        if not excel_file.name.endswith('.xlsx'):
+            return CustomResponse(message="file type not supported").failure_reponse()
+        excel_data = get_excel_data(excel_file)
         
-        wb = openpyxl.load_workbook(excel_file)
-        worksheet = wb.active
-        excel_data = list()
-        for row in worksheet.iter_rows():
-            row_data = list()
-            for cell in row:
-                row_data.append(cell.value)
-            excel_data.append(row_data)
+        headers = ['name']
         if not excel_data:
-            return CustomResponse(message="no data found in file").failure_reponse()
-        
-        excel_headers = ['name']
-        if excel_data[0] != excel_headers:
-            return CustomResponse(message="invalid file format").failure_reponse()
-        excel_data = [dict(zip(excel_headers, data)) for data in excel_data[1:]]
-        
+            return CustomResponse(message="The file is empty.").failure_reponse()
+        for header in headers:
+            if header not in excel_data[0]:
+                return CustomResponse(message=f"Please provide the {header} in the file.").failure_reponse()
+            
         user_id = get_user_id(request)
         serializer = BloodGroupCreateEditSerializer(data=excel_data[1:], context={'request': request, 'user_id': user_id}, many=True)
         if serializer.is_valid():
