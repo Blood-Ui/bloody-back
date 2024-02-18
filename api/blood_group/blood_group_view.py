@@ -1,8 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.db import transaction
 
 from api.models import Blood_Group
-from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
@@ -51,3 +52,38 @@ class Blood_Group_APIview(APIView):
         blood_group = Blood_Group.objects.get(id=blood_group_id)
         blood_group.delete()
         return CustomResponse(message="successfully deleted blood group").success_response()
+    
+class Blood_Group_Bulk_Import_APIview(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @allowed_roles([RoleList.ADMIN.value])
+    def post(self, request):
+        try:
+            excel_file = request.FILES["blood_groups"]
+        except:
+            return CustomResponse(message="file not found").failure_reponse()
+        if not excel_file.name.endswith('.xlsx'):
+            return CustomResponse(message="file type not supported").failure_reponse()
+        excel_data = get_excel_data(excel_file)
+        
+        headers = ['name']
+        if not excel_data:
+            return CustomResponse(message="The file is empty.").failure_reponse()
+        for header in headers:
+            if header not in excel_data[0]:
+                return CustomResponse(message=f"Please provide the {header} in the file.").failure_reponse()
+            
+        user_id = get_user_id(request)
+        serializer = BloodGroupCreateEditSerializer(data=excel_data[1:], context={'request': request, 'user_id': user_id}, many=True)
+        with transaction.atomic():
+            if serializer.is_valid():
+                if len(serializer.data) != len(excel_data[1:]):
+                    transaction.set_rollback(True)
+                    return CustomResponse(message="something went wrong, please try again", data=serializer.errors).failure_reponse()
+                serializer.save()
+                return CustomResponse(message="successfully imported blood groups", data=serializer.data).success_response()
+        errors_with_indices = []
+        for index, error in enumerate(serializer.errors):
+            errors_with_indices.append({"row_index": index + 1, "error": error if error else "no error"})  # Adjust index for headers
+
+        return CustomResponse(message="failed to import blood groups", data=errors_with_indices).failure_reponse()

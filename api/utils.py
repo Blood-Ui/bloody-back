@@ -2,6 +2,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from enum import Enum
 from rest_framework_simplejwt.authentication import JWTAuthentication
+import io
+from openpyxl import load_workbook
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomResponse():
@@ -71,3 +74,44 @@ def allowed_roles(allowed_roles):
                 return CustomResponse(message="You don't have permission to perform this action").failure_reponse()
         return wrapper
     return decorator
+
+def get_excel_data(excel_file):
+    # try:
+    #     excel_file = request.FILES[file_name]
+    #     if not excel_file.name.endswith('.xlsx'):
+    #         return CustomResponse(message="Please upload a valid excel file").failure_reponse()
+    # except:
+    #     return CustomResponse(message="file not found").failure_reponse()
+    
+    # wb = openpyxl.load_workbook(excel_file)
+    # worksheet = wb.active
+    # excel_data = list()
+    # for row in worksheet.iter_rows():
+    #     row_data = list()
+    #     for cell in row:
+    #         row_data.append(cell.value)
+    #     excel_data.append(row_data)
+    # if not excel_data:
+    #     return CustomResponse(message="no data found in file").failure_reponse()
+    
+    # excel_headers = ['name']
+    # if excel_data[0] != excel_headers:
+    #     return CustomResponse(message="invalid file format").failure_reponse()
+    # excel_data = [dict(zip(excel_headers, data)) for data in excel_data[1:]]
+    # return excel_data
+
+    
+
+    # Read the file in a more memory-efficient way using io.BytesIO
+    file_buffer = io.BytesIO(excel_file.read())
+
+    wb = load_workbook(file_buffer)
+    worksheet = wb.active
+    
+    # Use zip_longest to handle potentially different header/data lengths:
+    excel_data = []
+    for row in worksheet.iter_rows(values_only=True):
+        row_data = {header.value: cell for header, cell in zip(worksheet[1], row) if cell is not None}
+        excel_data.append(row_data)
+
+    return excel_data
