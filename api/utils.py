@@ -92,7 +92,7 @@ def get_excel_data(excel_file):
 
     return excel_data
 
-def generate_excel_template(sheet_names, headers, data_dict, column_widths, filename):
+def generate_excel_template(sheet_names, filename, headers, column_widths, data_dict={}):
     wb = Workbook()
     bold_font = Font(bold=True)
     for i, sheet_name in enumerate(sheet_names):

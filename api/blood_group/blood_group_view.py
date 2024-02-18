@@ -99,9 +99,8 @@ class Blood_Group_Base_Template_APIview(APIView):
     def get(self, request):
         sheet_names = ['Sheet1']
         headers = [['name']]
-        data_dict = {'blood_groups': []}
         column_widths = {'A': 20}
         filename = "blood_group_template.xlsx"
-        
-        response = generate_excel_template(sheet_names, headers, data_dict, column_widths, filename)
+
+        response = generate_excel_template(sheet_names, filename, headers, column_widths)
         return response

@@ -108,5 +108,5 @@ class CityBaseTemplateAPIView(APIView):
         filename = 'city_base_template.xlsx'
         column_widths = {'A': 30, 'B': 35}
 
-        response = generate_excel_template(sheet_names, headers, data_dict, column_widths, filename)
+        response = generate_excel_template(sheet_names, filename, headers, column_widths, data_dict)
         return response
