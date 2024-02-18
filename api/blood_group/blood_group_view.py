@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-import openpyxl
+from django.db import transaction
 
 from api.models import Blood_Group
 from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data
@@ -75,9 +75,13 @@ class Blood_Group_Bulk_Import_APIview(APIView):
             
         user_id = get_user_id(request)
         serializer = BloodGroupCreateEditSerializer(data=excel_data[1:], context={'request': request, 'user_id': user_id}, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return CustomResponse(message="successfully imported blood groups", data=serializer.data).success_response()
+        with transaction.atomic():
+            if serializer.is_valid():
+                if len(serializer.data) != len(excel_data[1:]):
+                    transaction.set_rollback(True)
+                    return CustomResponse(message="something went wrong, please try again", data=serializer.errors).failure_reponse()
+                serializer.save()
+                return CustomResponse(message="successfully imported blood groups", data=serializer.data).success_response()
         errors_with_indices = []
         for index, error in enumerate(serializer.errors):
             errors_with_indices.append({"row_index": index + 1, "error": error if error else "no error"})  # Adjust index for headers
