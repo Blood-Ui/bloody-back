@@ -1,6 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
+from tempfile import NamedTemporaryFile
+from io import BytesIO
+from django.http import FileResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
 from api.models import City, District
 from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data
@@ -96,4 +101,40 @@ class CityBulkImportAPIView(APIView):
         for index, error in enumerate(serializer.errors):
             errors_with_indices.append({"row_index": index + 2, "error": error if error else "no error"})  # Adjust index for headers
         return CustomResponse(message="failed to import cities", data=errors_with_indices).failure_reponse()
-            
+    
+class CityBaseTemplateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @allowed_roles([RoleList.ADMIN.value])
+    def get(self, request):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Sheet1"
+        ws.append(['name', 'district'])
+        # Set column headers font as bold
+        bold_font = Font(bold=True)
+        for cell in ws[1]:
+            cell.font = bold_font
+        # Set column width
+        ws.column_dimensions['A'].width = 30
+        ws.column_dimensions['B'].width = 35
+        ws = wb.create_sheet('Data Definitions')
+        ws.append(['district'])
+        # set column header as bold and set width
+        for cell in ws[1]:
+            cell.font = bold_font
+        ws.column_dimensions['A'].width = 35
+        districts = District.objects.all().values_list('name', flat=True)
+        data = {'district': districts}
+        # Write data column-wise
+        for col_num, (col_name, col_values) in enumerate(data.items(), start=1):
+            for row, value in enumerate(col_values, start=2):
+                ws.cell(row=row, column=col_num, value=value)
+
+        with NamedTemporaryFile() as tmp:
+            tmp.close()  # with statement opened tmp, close it so wb.save can open it
+            wb.save(tmp.name)
+            with open(tmp.name, 'rb') as f:
+                f.seek(0)
+                new_file_object = f.read()
+        return FileResponse(BytesIO(new_file_object), as_attachment=True, filename='city_base_template.xlsx')

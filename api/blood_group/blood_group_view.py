@@ -107,7 +107,6 @@ class Blood_Group_Base_Template_APIview(APIView):
             cell.font = bold_font
         # Set column width
         ws.column_dimensions['A'].width = 30
-        wb.save('blood_group_base_template.xlsx')
         with NamedTemporaryFile() as tmp:
             tmp.close()  # with statement opened tmp, close it so wb.save can open it
             wb.save(tmp.name)
