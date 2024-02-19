@@ -109,7 +109,6 @@ def generate_excel_template(sheet_names, filename, headers, column_widths, data_
         if data:
             for col_num, (col_name, col_values) in enumerate(data.items(), start=1):
                 for row, value in enumerate(col_values, start=2):
-                    print(row, col_num, value)
                     ws.cell(row=row, column=col_num, value=value)
 
     del wb['Sheet']  # Remove default sheet
