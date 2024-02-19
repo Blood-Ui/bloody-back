@@ -78,17 +78,25 @@ class CityBulkImportAPIView(APIView):
                 return CustomResponse(message=f"Please provide the {header} in the file.").failure_reponse()
             
         error_rows = []
+        districts_to_fetch = set()
         for index, data in enumerate(excel_data[1:]):
-            district_name = data.pop('district')
+            district_name = data.get('district')
+            if district_name in districts_to_fetch:
+                continue
             if not District.objects.filter(name=district_name).exists():
                 error_rows.append({"row_index": index + 2, "error": "district does not exist"})
                 continue
-            if error_rows:
-                continue
-            district = District.objects.get(name=district_name)
-            data['district'] = district.id
+            districts_to_fetch.add(district_name)
         if error_rows:
             return CustomResponse(message="failed to import cities", data=error_rows).failure_reponse()
+        
+        districts = District.objects.filter(name__in=districts_to_fetch).values('id', 'name')
+        district_name_to_id = {district['name']: district['id'] for district in districts}
+        for index, data in enumerate(excel_data[1:]):
+            district_name = data.pop('district')
+            district_id = district_name_to_id[district_name]
+            data['district'] = district_id
+
         user_id = get_user_id(request)
         serializer = CityCreateSerializer(data=excel_data[1:], context={'request': request, 'user_id': user_id}, many=True)
         with transaction.atomic():
