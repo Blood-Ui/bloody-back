@@ -35,7 +35,7 @@ class PatientCreateSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['id'] = instance.id
+        representation['id'] = instance.get('id')
 
         return representation
     

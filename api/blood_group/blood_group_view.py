@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 from api.models import Blood_Group
-from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data
+from api.utils import CustomResponse, get_user_id, RoleList, allowed_roles, get_excel_data, generate_excel_template
 from .blood_group_serializer import BloodGroupDropDownSerizlizer, BloodGroupListSerializer, BloodGroupCreateEditSerializer
 
 class Blood_Group_DropdownAPIview(APIView):
@@ -97,20 +97,10 @@ class Blood_Group_Base_Template_APIview(APIView):
 
     @allowed_roles([RoleList.ADMIN.value])
     def get(self, request):
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Sheet1"
-        ws.append(["name"])
-        # Set column headers font as bold
-        bold_font = Font(bold=True)
-        for cell in ws[1]:
-            cell.font = bold_font
-        # Set column width
-        ws.column_dimensions['A'].width = 30
-        with NamedTemporaryFile() as tmp:
-            tmp.close()  # with statement opened tmp, close it so wb.save can open it
-            wb.save(tmp.name)
-            with open(tmp.name, 'rb') as f:
-                f.seek(0)
-                new_file_object = f.read()
-        return FileResponse(BytesIO(new_file_object), as_attachment=True, filename='blood_group_base_template.xlsx')
+        sheet_names = ['Sheet1']
+        headers = [['name']]
+        column_widths = {'A': 20}
+        filename = "blood_group_base_template.xlsx"
+
+        response = generate_excel_template(sheet_names, filename, headers, column_widths)
+        return response
